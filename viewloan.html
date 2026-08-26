@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SANSTEEL SACCO – Loan Application</title>
+  <meta name="theme-color" content="#0d1f3c"/>
+  <link rel="manifest" href="manifest.json"/>
+  <link rel="icon" href="icons/icon-192.png"/>
+  <style>
+    html,body{margin:0;padding:0;overflow-y:auto;background:#f0f2f5;font-family:Arial,sans-serif;}
+    .page-wrap{max-width:800px;margin:30px auto 50px auto;background:#fff;border-radius:10px;box-shadow:0 4px 20px rgba(0,0,0,.12);overflow:hidden;}
+    .doc-header{background:#0d1f3c;color:#fff;padding:22px 32px;display:flex;align-items:center;gap:18px;}
+    .doc-header img{width:70px;height:70px;border-radius:50%;border:3px solid #c9a84c;object-fit:cover;flex-shrink:0;}
+    .doc-header h1{margin:0 0 4px 0;font-size:19px;color:#c9a84c;letter-spacing:.03em;}
+    .doc-header h2{margin:0;font-size:13px;font-weight:normal;color:rgba(255,255,255,.7);}
+    .status-bar{padding:10px 32px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #e8e8e8;background:#f8f9fa;flex-wrap:wrap;gap:8px;}
+    .app-id-label{font-size:13px;font-weight:700;color:#0d1f3c;letter-spacing:.03em;}
+    .badge{display:inline-block;padding:5px 18px;border-radius:20px;font-size:12px;font-weight:700;}
+    .badge-pending {background:#fff3cd;color:#856404;border:1px solid #ffc107;}
+    .badge-processing {background:#d1ecf1;color:#0c5460;border:1px solid #17a2b8;}
+    .badge-approved {background:#d4edda;color:#155724;border:1px solid #28a745;}
+    .badge-disbursed {background:#0d1f3c;color:#c9a84c;border:1px solid #0d1f3c;}
+    .badge-rejected{background:#f8d7da;color:#721c24;border:1px solid #dc3545;}
+    .badge-default {background:#e2e3e5;color:#383d41;border:1px solid #ccc;}
+    .processing-banner { padding: 12px 32px; background: #d1ecf1; border-left: 6px solid #17a2b8; border-bottom: 1px solid #bee5eb; display: flex; align-items: center; gap: 12px; font-size: 14px; color: #0c5460; }
+    .approved-banner { padding: 12px 32px; background: #d4edda; border-left: 6px solid #28a745; border-bottom: 1px solid #c3e6cb; display: flex; align-items: center; gap: 12px; font-size: 14px; color: #155724; }
+    .disbursed-banner { padding: 12px 32px; background: #0d1f3c; border-left: 6px solid #c9a84c; border-bottom: 1px solid #1a3560; display: flex; align-items: center; gap: 12px; font-size: 14px; color: #c9a84c; }
+    .action-bar{display:flex;gap:10px;padding:14px 32px;background:#fff;border-bottom:1px solid #eee;}
+    .btn{padding:9px 20px;border:none;border-radius:6px;font-size:13px;font-weight:700;cursor:pointer;transition:.2s;}
+    .btn-pdf  {background:#1a5276;color:#fff;} .btn-pdf:hover{background:#154360;}
+    .btn-print{background:#117a65;color:#fff;} .btn-print:hover{background:#0e6655;}
+    .btn:disabled{background:#aaa;cursor:not-allowed;}
+    .doc-body{padding:24px 32px;}
+    .sec-title{background:#0d1f3c;color:#c9a84c;font-weight:700;font-size:12px;letter-spacing:.07em;padding:8px 14px;border-radius:4px 4px 0 0;text-transform:uppercase;margin:20px 0 0 0;}
+    .info-grid{display:grid;grid-template-columns:1fr 1fr;border:1px solid #ddd;border-top:none;margin-bottom:0;}
+    .info-grid.full{grid-template-columns:1fr;}
+    .info-item{padding:10px 14px;border-bottom:1px solid #eee;border-right:1px solid #eee;font-size:13px;}
+    .info-item:nth-child(even){border-right:none;}
+    .info-item label{display:block;font-size:11px;text-transform:uppercase;color:#999;font-weight:700;margin-bottom:3px;}
+    .info-item span{color:#1a1a1a;font-weight:500;}
+    .data-table{width:100%;border-collapse:collapse;font-size:13px;border:1px solid #ddd;border-top:none;}
+    .data-table th{background:#eaf0fb;padding:9px 12px;text-align:left;font-size:12px;font-weight:700;color:#0d1f3c;border-bottom:1px solid #ddd;}
+    .data-table td{padding:9px 12px;border-bottom:1px solid #eee;color:#333;}
+    .data-table tr:last-child td{border-bottom:none;}
+    .data-table tr:nth-child(even) td{background:#f9f9f9;}
+    .doc-footer{background:#f8f9fa;border-top:1px solid #eee;text-align:center;padding:14px;font-size:11px;color:#aaa;margin-top:28px;}
+    .state-box{text-align:center;padding:60px 20px;}
+    .state-box .icon{font-size:40px;margin-bottom:12px;}
+    .state-box p{font-size:15px;color:#555;margin:0;}
+    .state-box.error p{color:#c0392b;}
+    @media print{
+      body{background:#fff;} .page-wrap{box-shadow:none;margin:0;border-radius:0;} .action-bar{display:none!important;}
+      .sec-title{background:#0d1f3c!important;color:#c9a84c!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+      .doc-header{background:#0d1f3c!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+      .processing-banner,.approved-banner,.disbursed-banner{display:none!important;}
+    }
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+</head>
+<body>
+
+<div class="page-wrap">
+  <div class="doc-header">
+    <img src="assets/logo.png" alt="SANSTEEL SACCO"/>
+    <div>
+      <h1>SANSTEEL SACCO LIMITED</h1>
+      <h2>Loan Application Record</h2>
+    </div>
+  </div>
+  <div id="stateBox" class="state-box"><div class="icon">⏳</div><p>Loading application record...</p></div>
+  <div id="docContent" style="display:none"></div>
+</div>
+
+<script src="config.js"></script>
+<script src="app.js"></script>
+<script>
+const APP_ID = getUrlParam("id");
+
+window.onload = function() {
+  if (!APP_ID) { showState('error', '❌', 'No Application ID found in the URL.'); return; }
+  fetchRecord(APP_ID);
+};
+
+function fetchRecord(appId) {
+  const cbName = 'cb_' + Math.random().toString(36).slice(2);
+  const timeout = setTimeout(() => { delete window[cbName]; showState('error', '❌', 'Request timed out. Please try again or contact the SACCO office.'); }, 15000);
+  window[cbName] = function(data) {
+    clearTimeout(timeout); delete window[cbName];
+    const s = document.getElementById('jsonpScript'); if (s) s.remove();
+    if (!data) { showState('error', '❌', 'Application record not found. It may not have been saved yet, or the ID is incorrect.'); return; }
+    renderRecord(data);
+  };
+  const script = document.createElement('script');
+  script.id = 'jsonpScript';
+  script.src = window.APPS_SCRIPT_URL + '?page=getloan&id=' + encodeURIComponent(appId) + '&callback=' + cbName;
+  script.onerror = () => { clearTimeout(timeout); delete window[cbName]; showState('error', '❌', 'Failed to connect. Please check your internet connection.'); };
+  document.head.appendChild(script);
+}
+
+function showState(type, icon, msg) {
+  const box = document.getElementById('stateBox');
+  box.className = 'state-box' + (type === 'error' ? ' error' : '');
+  box.innerHTML = `<div class="icon">${icon}</div><p>${msg}</p>`;
+  box.style.display = 'block';
+  document.getElementById('docContent').style.display = 'none';
+}
+
+function f(val) { return (val === undefined || val === null || val === '') ? '—' : val; }
+function money(val) { const n = parseFloat(String(val).replace(/,/g,'')); if (isNaN(n) || n === 0) return '—'; return 'KES ' + n.toLocaleString('en-KE', {minimumFractionDigits:2, maximumFractionDigits:2}); }
+function statusBadge(status) {
+  const s = (status || '').toLowerCase();
+  let cls = 'badge-default', label = status || 'Pending Review';
+  if (s.includes('pending review')) { cls = 'badge-pending'; label = 'Pending Review'; }
+  else if (s.includes('processing') || s.includes('in progress')) { cls = 'badge-processing'; label = 'Processing in Progress'; }
+  else if (s.includes('approved-awaiting') || s.includes('approved awaiting') || s.includes('approved-awaiting disbursement')) { cls = 'badge-approved'; label = 'Approved-Awaiting Disbursement'; }
+  else if (s.includes('funds disbursed') || s.includes('disbursed')) { cls = 'badge-disbursed'; label = 'Approved-Funds Disbursed'; }
+  else if (s.includes('rejected')) { cls = 'badge-rejected'; label = 'Rejected'; }
+  return `<span class="badge ${cls}">${label}</span>`;
+}
+function getProcessingTime(loanType) {
+  const type = (loanType || '').toLowerCase();
+  if (type.includes('development')) return '1 month';
+  else if (type.includes('emergency')) return '1 week';
+  else if (type.includes('instant')) return '1 day';
+  else if (type.includes('item')) return '1 week';
+  else if (type.includes('christmas') || type.includes('back to work') || type.includes('backtowork')) return '1 week';
+  return 'a few days';
+}
+
+function renderRecord(rec) {
+  document.getElementById('stateBox').style.display = 'none';
+  const m = rec.member || {}; const d = rec.details || {}; const g = rec.guarantors || [];
+  const p = (d.purposes || []).filter(x => x && x.desc);
+  const status = rec.status || 'Pending Review'; const statusLower = status.toLowerCase();
+  const isPending = statusLower.includes('pending review');
+  const isProcessing = statusLower.includes('processing') || statusLower.includes('in progress');
+  const isApproved = statusLower.includes('approved-awaiting') || statusLower.includes('approved awaiting');
+  const isDisbursed = statusLower.includes('funds disbursed') || statusLower.includes('disbursed');
+  const processingTime = getProcessingTime(rec.loanType);
+  let html = '';
+  html += `<div class="status-bar"><span class="app-id-label">🆔 ${f(rec.appId)}</span>${statusBadge(status)}</div>`;
+  if (isProcessing) { html += `<div class="processing-banner"><span class="icon">⏳</span><div><strong>Processing in Progress:</strong> Your ${f(rec.loanType)} application is currently being reviewed. This usually takes approximately <strong>${processingTime}</strong> from this stage.</div></div>`; }
+  else if (isApproved) { html += `<div class="approved-banner"><span class="icon">✅</span><div><strong>Approved - Awaiting Disbursement:</strong> Your ${f(rec.loanType)} application has been approved! Funds will be disbursed to your account shortly.</div></div>`; }
+  else if (isDisbursed) { html += `<div class="disbursed-banner"><span class="icon">💰</span><div><strong>Funds Disbursed:</strong> Your ${f(rec.loanType)} funds have been successfully disbursed. Please check your account for the credited amount.</div></div>`; }
+  html += `<div class="action-bar"><button class="btn btn-pdf" id="pdfBtn" onclick="downloadPDF()">📄 Download PDF</button><button class="btn btn-print" onclick="window.print()">🖨️ Print</button></div><div class="doc-body" id="docBody">`;
+  html += `<div class="sec-title">Application Details</div><div class="info-grid">
+      <div class="info-item"><label>Application ID</label><span>${f(rec.appId)}</span></div>
+      <div class="info-item"><label>Submission Date</label><span>${f(rec.submitted)}</span></div>
+      <div class="info-item"><label>Loan Type</label><span>${f(rec.loanType)}</span></div>
+      <div class="info-item"><label>Status</label><span>${statusBadge(status)}</span></div></div>`;
+  html += `<div class="sec-title">Member Information</div><div class="info-grid">
+      <div class="info-item"><label>Full Name</label><span>${f(m.name)}</span></div>
+      <div class="info-item"><label>Registration No.</label><span>${f(m.regNo)}</span></div>
+      <div class="info-item"><label>National ID</label><span>${f(m.idNo)}</span></div>
+      <div class="info-item"><label>Phone</label><span>${f(m.phone)}</span></div>
+      <div class="info-item"><label>Account Balance</label><span>${money(m.balance)}</span></div>
+      <div class="info-item"><label>Existing Loan Balance</label><span>${money(m.loanBalance)}</span></div></div>`;
+  html += `<div class="sec-title">Loan Details</div><div class="info-grid">
+      <div class="info-item"><label>Amount Applied</label><span>${money(d.amount)}</span></div>
+      <div class="info-item"><label>Period</label><span>${d.months ? d.months + ' months' : '—'}</span></div>
+      <div class="info-item"><label>Monthly Installment</label><span>${money(d.installment)}</span></div>
+      <div class="info-item"><label>Commence Date</label><span>${f(d.commenceDate || d.date)}</span></div></div>`;
+  if (p.length > 0) {
+    html += `<div class="sec-title">Loan Purpose</div><table class="data-table"><tr><th>#</th><th>Description</th><th>Amount (KES)</th></tr>`;
+    p.forEach((x, i) => { html += `<tr><td>${i+1}</td><td>${f(x.desc)}</td><td>${money(x.amt)}</td></tr>`; });
+    html += `</table>`;
+  } else if (d.item || d.purpose) {
+    html += `<div class="sec-title">Purpose / Item</div><div class="info-grid full"><div class="info-item"><label>Description</label><span>${f(d.item || d.purpose)}</span></div></div>`;
+  }
+  if (d.security && d.security.filter(Boolean).length > 0) {
+    html += `<div class="sec-title">Security Offered</div><div class="info-grid full"><div class="info-item"><label>Security</label><span>${d.security.filter(Boolean).join(', ')}</span></div></div>`;
+  }
+  if (g.length > 0) {
+    html += `<div class="sec-title">Guarantors</div><table class="data-table"><tr><th>#</th><th>Name</th><th>ID No.</th><th>Phone No.</th><th>Membership No.</th><th>Status</th><th>Initials</th></tr>`;
+    g.forEach((gu, i) => {
+      const gStatus = gu.status || 'Accepted';
+      const gCls = gStatus === 'Accepted' ? 'badge-approved' : gStatus === 'Declined' ? 'badge-rejected' : 'badge-pending';
+      html += `<tr><td>${i+1}</td><td>${f(gu.name)}</td><td>${f(gu.idNo || gu.id)}</td><td>${f(gu.phone)}</td><td>${f(gu.membershipNo)}</td><td><span class="badge ${gCls}">${gStatus}</span></td><td>${f(gu.initials)}</td></tr>`;
+    });
+    html += `</table>`;
+  }
+  if (d.witnessName) {
+    html += `<div class="sec-title">Witness</div><div class="info-grid">
+      <div class="info-item"><label>Witness Name</label><span>${f(d.witnessName)}</span></div>
+      <div class="info-item"><label>Witness ID No.</label><span>${f(d.witnessIdNo || d.witnessMembNo || '—')}</span></div>
+      <div class="info-item"><label>Witness Tel / Email</label><span>${f(d.witnessTel || '—')}</span></div>
+      <div class="info-item"><label>Witness Address</label><span>${f(d.witnessAddr || '—')}</span></div></div>`;
+  }
+  html += `</div>`;
+  html += `<div style="margin:0 32px 28px 32px;"><div style="background:#0d1f3c;color:#c9a84c;font-weight:700;font-size:12px;letter-spacing:.07em;padding:8px 14px;border-radius:4px 4px 0 0;text-transform:uppercase;">Credit Committee</div>
+    <div style="border:1px solid #ddd;border-top:none;border-radius:0 0 4px 4px;padding:20px 18px;">
+      <p style="font-size:12px;color:#888;margin:0 0 20px 0;">This application has been reviewed and approved by the Credit Committee of SANSTEEL SACCO LIMITED.</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:28px;">`;
+  ['Chairman / Vice Chairman','Secretary','Member'].forEach(function (t) {
+    html += `<div><p style="font-size:12px;font-weight:700;color:#0d1f3c;margin:0 0 28px 0;">${t}</p><div style="border-bottom:1px solid #333;margin-bottom:6px;height:36px;"></div><p style="font-size:11px;color:#888;margin:0 0 18px 0;">Signature</p><div style="border-bottom:1px solid #333;margin-bottom:6px;height:28px;"></div><p style="font-size:11px;color:#888;margin:0;">Date</p></div>`;
+  });
+  html += `</div></div></div>`;
+  html += `<div class="doc-footer">SANSTEEL SACCO LIMITED &nbsp;|&nbsp; Generated: ${new Date().toLocaleString('en-KE')} &nbsp;|&nbsp; This is a system-generated document.</div>`;
+  document.getElementById('docContent').innerHTML = html;
+  document.getElementById('docContent').style.display = 'block';
+}
+
+function downloadPDF() {
+  const btn = document.getElementById('pdfBtn'); btn.disabled = true; btn.textContent = '⏳ Generating...';
+  html2pdf().set({ margin:[10,10,10,10], filename:(APP_ID || 'LoanApplication') + '.pdf', image:{type:'jpeg',quality:0.98}, html2canvas:{scale:2,useCORS:true}, jsPDF:{unit:'mm',format:'a4',orientation:'portrait'} })
+    .from(document.getElementById('docBody')).save()
+    .then(() => { btn.disabled=false; btn.textContent='📄 Download PDF'; })
+    .catch(err => { alert('PDF error: '+err.message); btn.disabled=false; btn.textContent='📄 Download PDF'; });
+}
+</script>
+</body>
+</html>

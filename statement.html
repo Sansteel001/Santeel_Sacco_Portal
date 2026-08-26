@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SANSTEEL SACCO – Quarterly Statement</title>
+  <meta name="theme-color" content="#0d1f3c"/>
+  <link rel="manifest" href="manifest.json"/>
+  <link rel="icon" href="icons/icon-192.png"/>
+  <style>
+    html, body { margin:0; padding:0; overflow-y:auto !important; }
+    #output { height:auto !important; overflow:visible !important; }
+    body { font-family: Arial, sans-serif; margin: 20px; background:#f5f7fa; }
+    .header { text-align:center; margin-bottom:20px; }
+    .header h1 { color:#004aad; font-size:22px; margin:0 0 4px 0; }
+    .header h2 { color:#333; font-size:15px; font-weight:normal; margin:0; }
+    .controls { max-width:440px; margin:0 auto 24px auto; background:#fff; border-radius:10px; padding:24px; box-shadow:0 2px 12px rgba(0,0,0,.09); }
+    .controls h3 { margin:0 0 16px 0; color:#004aad; font-size:16px; }
+    label { display:block; font-size:13px; font-weight:600; color:#555; margin-bottom:6px; margin-top:12px; }
+    label:first-of-type { margin-top:0; }
+    input, select { width:100%; padding:10px 12px; border:1px solid #ddd; border-radius:6px; font-size:14px; box-sizing:border-box; background:#fff; }
+    input:focus, select:focus { outline:none; border-color:#004aad; }
+    .btn { margin-top:18px; width:100%; padding:12px; background:#004aad; color:#fff; border:none; border-radius:6px; font-size:15px; font-weight:600; cursor:pointer; transition:background .2s; }
+    .btn:hover { background:#003580; }
+    .button-group { display:flex; gap:10px; margin:20px auto; max-width:440px; }
+    .download-btn { flex:1; padding:12px; background:#28a745; color:#fff; border:none; border-radius:6px; font-size:14px; font-weight:600; cursor:pointer; transition:background .2s; }
+    .download-btn:hover { background:#218838; }
+    .download-btn:disabled { background:#aaa; cursor:not-allowed; }
+    .print-btn { flex:1; padding:12px; background:#6c757d; color:#fff; border:none; border-radius:6px; font-size:14px; font-weight:600; cursor:pointer; transition:background .2s; }
+    .print-btn:hover { background:#545b62; }
+    #downloadSection { display:none; }
+    .output-wrap { max-width:720px; margin:0 auto; background:#fff; border-radius:10px; padding:24px; box-shadow:0 2px 12px rgba(0,0,0,.09); }
+    .info-table { width:100%; margin:12px 0 18px 0; border-collapse:collapse; }
+    .info-table td { padding:7px; vertical-align:top; font-size:13px; }
+    .section-header { background:#004aad; color:#fff; font-weight:bold; text-align:center; padding:9px; margin-top:12px; border-radius:4px 4px 0 0; font-size:14px; }
+    .data-table { width:100%; border-collapse:collapse; margin-bottom:16px; }
+    .data-table th, .data-table td { border:1px solid #ccc; padding:8px; font-size:13px; text-align:center; }
+    .data-table tr:nth-child(even) td { background:#f9f9f9; }
+    .small { font-size:12px; color:#888; }
+    .nav-links { text-align:center; margin-top:20px; font-size:13px; }
+    .nav-links a { color:#004aad; text-decoration:none; margin:0 10px; }
+    .nav-links a:hover { text-decoration:underline; }
+    @media print {
+      html, body { margin:0 !important; padding:0 !important; overflow:visible !important; background:#fff; }
+      #output { height:auto !important; overflow:visible !important; }
+      .section-header, .data-table { page-break-inside:avoid; page-break-after:auto; }
+      .controls, #downloadSection, .nav-links, hr { display:none !important; }
+      body { -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+      .section-header { background:#004aad !important; color:#fff !important; }
+    }
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+</head>
+<body>
+
+<div class="header">
+  <h1>SANSTEEL SACCO LIMITED</h1>
+  <h2>Quarterly Financial Statement</h2>
+</div>
+
+<div class="controls">
+  <h3>📄 Generate Your Statement</h3>
+  <label>National ID</label>
+  <input id="memberID" type="text" placeholder="e.g. 123456789"/>
+  <label>Select Year</label>
+  <select id="yearSelect">
+    <option>2025</option><option>2026</option><option>2027</option>
+    <option>2028</option><option>2029</option><option>2030</option>
+    <option>2031</option><option>2032</option>
+  </select>
+  <label>Period</label>
+  <select id="period">
+    <option>QUARTER 1</option><option>QUARTER 2</option><option>QUARTER 3</option>
+  </select>
+  <button class="btn" onclick="generateStatement()">Generate Statement</button>
+</div>
+
+<div id="downloadSection">
+  <div class="button-group">
+    <button class="download-btn" onclick="downloadPDF()">📄 Download PDF</button>
+    <button class="print-btn" onclick="printStatement()">🖨️ Print</button>
+  </div>
+</div>
+
+<div class="output-wrap" id="outputWrap" style="display:none">
+  <div id="output"></div>
+</div>
+
+<div class="nav-links">
+  <a href="index.html">📋 Overview Summary</a>
+  &nbsp;|&nbsp;
+  <a href="loan.html">📝 Apply for Loan</a>
+</div>
+
+<script src="config.js"></script>
+<script src="app.js"></script>
+<script>
+  function formatNumber(value) {
+    const num = parseFloat(String(value).replace(/,/g, ''));
+    if (isNaN(num)) return value;
+    return num.toLocaleString('en-US', { minimumFractionDigits:0, maximumFractionDigits:0 });
+  }
+  function isNumeric(value) {
+    if (!value) return false;
+    const cleaned = String(value).replace(/,/g, '').trim();
+    return !isNaN(cleaned) && cleaned !== '';
+  }
+  function findSectionRow(data, sectionName) {
+    for (let r = 0; r < data.length; r++) {
+      for (let c = 0; c < data[r].length; c++) {
+        const v = (data[r][c] || '').toString().trim().toLowerCase();
+        if (v === sectionName.toLowerCase()) return { r, c };
+      }
+    }
+    return null;
+  }
+  function printStatement() { window.print(); }
+  function downloadPDF() {
+    const memberID = document.getElementById('memberID').value.trim();
+    const year = document.getElementById('yearSelect').value;
+    const period = document.getElementById('period').value;
+    if (!memberID) { alert('Please enter Member ID before downloading.'); return; }
+    const filename = `Statement_${memberID}_${year}_${period.replace(/\s+/g,'_')}.pdf`;
+    const options = { margin: [10,10,10,10], filename, image: { type:'jpeg', quality:0.98 }, html2canvas: { scale:2, useCORS:true }, jsPDF: { unit:'mm', format:'a4', orientation:'portrait' } };
+    const btn = document.querySelector('.download-btn');
+    const orig = btn.innerHTML;
+    btn.innerHTML = '⏳ Generating...'; btn.disabled = true;
+    html2pdf().set(options).from(document.getElementById('output')).save()
+      .then(() => { btn.innerHTML = orig; btn.disabled = false; })
+      .catch(err => { alert('PDF error: ' + err.message); btn.innerHTML = orig; btn.disabled = false; });
+  }
+  function generateStatement() {
+    const memberID = document.getElementById('memberID').value.trim();
+    const year = document.getElementById('yearSelect').value;
+    const period = document.getElementById('period').value;
+    if (!memberID) { alert('Please enter Member ID'); return; }
+    const btn = document.querySelector('.btn');
+    btn.disabled = true; btn.textContent = '⏳ Loading...';
+    document.getElementById('downloadSection').style.display = 'none';
+    document.getElementById('outputWrap').style.display = 'none';
+    jsonpCall("getstatement", { id: memberID, period: period, year: year })
+      .then(function (data) { processData(data); btn.disabled = false; btn.textContent = 'Generate Statement'; })
+      .catch(function (err) { alert('Error: ' + err.message); btn.disabled = false; btn.textContent = 'Generate Statement'; });
+  }
+  function processData(data) {
+    if (!Array.isArray(data) || !data.length) { alert('No data returned. Check that your Member ID is correct.'); return; }
+    const sections = ['SHARES','DEPOSITS','LOANS','INTEREST'];
+    function getField(label) {
+      for (let r = 0; r < data.length; r++) {
+        for (let c = 0; c < data[r].length; c++) {
+          const cell = (data[r][c] || '').toString().trim();
+          if (cell.toLowerCase().includes(label.toLowerCase())) {
+            const nxt = data[r][c+1] || data[r][c+2] || '';
+            if (String(nxt).trim() !== '') return nxt;
+            const parts = cell.split(':');
+            if (parts.length > 1) return parts[1].trim();
+          }
+        }
+      }
+      return '';
+    }
+    const memberName = getField("MEMBER");
+    const regNo = getField("REG");
+    const nationalID = getField("NATIONAL");
+    const accNo = getField("ACCOUNT");
+    const periodVal = getField("PERIOD");
+    const statementAsAt = getField("STATEMENT");
+    let out = `<table class="info-table">
+      <tr><td><b>MEMBER'S NAME:</b> ${memberName}</td><td><b>REGISTRATION NO:</b> ${regNo}</td></tr>
+      <tr><td><b>NATIONAL ID NO:</b> ${nationalID}</td><td><b>ACCOUNT NO:</b> ${accNo}</td></tr>
+      <tr><td><b>PERIOD:</b> ${periodVal}</td><td><b>STATEMENT AS AT:</b> ${statementAsAt}</td></tr>
+    </table>`;
+    const sectionPositions = {};
+    for (const s of sections) { const pos = findSectionRow(data, s); if (pos) sectionPositions[s] = pos.r; }
+    const presentSections = Object.keys(sectionPositions).map(s => ({ name: s, row: sectionPositions[s] })).sort((a,b) => a.row - b.row);
+    for (let i = 0; i < presentSections.length; i++) {
+      const s = presentSections[i].name;
+      const start = presentSections[i].row;
+      const end = (i+1 < presentSections.length) ? presentSections[i+1].row - 1 : data.length - 1;
+      const rows = [];
+      for (let r = start+1; r <= end; r++) { if (!data[r].every(c => !c || String(c).trim() === '')) rows.push(data[r]); }
+      out += `<div class="section-header">${s}</div><table class="data-table">`;
+      rows.forEach(row => { out += '<tr>'; row.forEach(val => { out += `<td>${isNumeric(val) ? formatNumber(val) : (val||'')}</td>`; }); out += '</tr>'; });
+      out += '</table>';
+    }
+    document.getElementById('output').innerHTML = out;
+    document.getElementById('outputWrap').style.display = 'block';
+    document.getElementById('downloadSection').style.display = 'block';
+    document.getElementById('outputWrap').scrollIntoView({ behavior:'smooth' });
+  }
+</script>
+</body>
+</html>

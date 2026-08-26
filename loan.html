@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>SANSTEEL SACCO – Loan Application</title>
+<meta name="theme-color" content="#0d1f3c"/>
+<link rel="manifest" href="manifest.json"/>
+<link rel="icon" href="icons/icon-192.png"/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+  :root { --navy:#0d1f3c; --navy2:#162847; --gold:#c9a84c; --gold2:#e8c878; --cream:#faf8f3; --offwhite:#f4f1ea; --mid:#7a8499; --light:#ddd8cc; --white:#ffffff; --success:#1d6c45; --error:#a81c1c; --border:#d4cfc3; --radius:6px; --shadow:0 4px 24px rgba(13,31,60,.10); }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--offwhite); color: var(--navy); min-height: 100vh; }
+  body::before { content: ''; position: fixed; inset: 0; z-index: 0; background-image: radial-gradient(circle at 15% 15%, rgba(201,168,76,.08) 0%, transparent 50%), radial-gradient(circle at 85% 85%, rgba(13,31,60,.06) 0%, transparent 50%); pointer-events: none; }
+  .site-header { background: var(--navy); padding: 0 2rem; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 20px rgba(0,0,0,.25); }
+  .header-inner { max-width: 900px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; padding: 1rem 0; }
+  .logo-block { display: flex; align-items: center; gap: .9rem; }
+  .logo-emblem { width: 48px; height: 48px; border: 2px solid var(--gold); border-radius: 50%; display: flex; align-items: center; justify-content: center; background: var(--white); flex-shrink: 0; overflow: hidden; }
+  .logo-emblem img { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; display: block; }
+  .logo-text { line-height: 1.2; }
+  .logo-text strong { display: block; color: var(--gold); font-size: .85rem; letter-spacing: .08em; text-transform: uppercase; }
+  .logo-text span { color: rgba(255,255,255,.6); font-size: .7rem; letter-spacing: .04em; }
+  .header-badge { background: rgba(201,168,76,.15); border: 1px solid rgba(201,168,76,.35); color: var(--gold2); font-size: .7rem; letter-spacing: .08em; text-transform: uppercase; padding: .35rem .85rem; border-radius: 20px; font-weight: 500; }
+  .main { position: relative; z-index: 1; max-width: 900px; margin: 0 auto; padding: 2.5rem 1.5rem 5rem; }
+  .page-title { text-align: center; margin-bottom: 2.5rem; }
+  .page-title h1 { font-family: 'Playfair Display', serif; font-size: clamp(1.8rem, 4vw, 2.6rem); font-weight: 900; color: var(--navy); line-height: 1.1; letter-spacing: -.02em; }
+  .page-title p { color: var(--mid); font-size: .92rem; margin-top: .5rem; }
+  .gold-bar { width: 60px; height: 3px; background: linear-gradient(90deg, var(--gold), var(--gold2)); border-radius: 2px; margin: .75rem auto 0; }
+  .verify-card { background: var(--white); border: 1px solid var(--border); border-radius: 12px; box-shadow: var(--shadow); overflow: hidden; margin-bottom: 2rem; transition: box-shadow .3s; }
+  .card-header { background: linear-gradient(135deg, var(--navy) 0%, var(--navy2) 100%); padding: 1.25rem 1.75rem; display: flex; align-items: center; gap: 1rem; }
+  .step-badge { width: 32px; height: 32px; border-radius: 50%; background: var(--gold); color: var(--navy); font-weight: 700; font-size: .85rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .card-header h2 { color: var(--white); font-size: 1rem; font-weight: 600; letter-spacing: .01em; }
+  .card-header p { color: rgba(255,255,255,.55); font-size: .78rem; margin-top: .1rem; }
+  .card-body { padding: 1.75rem; }
+  .member-info { display: none; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem; background: #f0f7ff; border: 1px solid #c8dff7; border-radius: 8px; padding: 1.25rem; margin-top: 1rem; }
+  .member-info.show { display: grid; }
+  .info-item label { display: block; font-size: .7rem; font-weight: 600; color: var(--mid); text-transform: uppercase; letter-spacing: .07em; margin-bottom: .25rem; }
+  .info-item span { font-size: .92rem; font-weight: 600; color: var(--navy); font-family: 'DM Mono', monospace; }
+  .max-loan-highlight { background: linear-gradient(135deg, #e8f5e9, #c8e6c9); border: 1px solid #81c784; border-radius: 8px; padding: .75rem 1rem; display: flex; align-items: center; gap: .75rem; margin-top: 1rem; }
+  .max-loan-highlight .mla-icon { font-size: 1.5rem; }
+  .max-loan-highlight .mla-text label { display: block; font-size: .68rem; font-weight: 700; color: #2e7d32; text-transform: uppercase; letter-spacing: .07em; }
+  .max-loan-highlight .mla-text span { font-size: 1.25rem; font-weight: 700; color: #1b5e20; font-family: 'DM Mono', monospace; }
+  .loan-types { display: grid; grid-template-columns: repeat(auto-fill, minmax(155px, 1fr)); gap: .85rem; margin-top: 1rem; }
+  .loan-type-btn { border: 2px solid var(--border); border-radius: 10px; padding: 1rem .85rem; background: var(--white); cursor: pointer; transition: all .2s; text-align: center; position: relative; }
+  .loan-type-btn:hover { border-color: var(--gold); background: #fffdf5; }
+  .loan-type-btn.active { border-color: var(--navy); background: var(--navy); color: var(--white); box-shadow: 0 4px 16px rgba(13,31,60,.2); }
+  .loan-type-btn .lt-icon { font-size: 1.5rem; display: block; margin-bottom: .4rem; }
+  .loan-type-btn .lt-name { font-size: .8rem; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; line-height: 1.2; }
+  .loan-type-btn.active .lt-name { color: var(--gold); }
+  .loan-type-btn .lt-desc { font-size: .68rem; color: var(--mid); margin-top: .25rem; }
+  .loan-type-btn.active .lt-desc { color: rgba(255,255,255,.6); }
+  .check-mark { position: absolute; top: .5rem; right: .5rem; width: 18px; height: 18px; border-radius: 50%; background: var(--gold); color: var(--navy); font-size: .7rem; font-weight: 700; display: none; align-items: center; justify-content: center; }
+  .loan-type-btn.active .check-mark { display: flex; }
+  .form-card { background: var(--white); border: 1px solid var(--border); border-radius: 12px; box-shadow: var(--shadow); overflow: hidden; display: none; animation: slideIn .35s ease; }
+  .form-card.show { display: block; }
+  @keyframes slideIn { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+  .section-divider { background: linear-gradient(135deg, var(--navy) 0%, #1e3560 100%); padding: .85rem 1.75rem; display: flex; align-items: center; gap: .75rem; }
+  .section-divider .sd-num { width: 24px; height: 24px; border-radius: 50%; border: 1.5px solid rgba(201,168,76,.6); color: var(--gold); font-size: .72rem; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .section-divider h3 { color: var(--white); font-size: .88rem; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; }
+  .section-divider p { color: rgba(255,255,255,.5); font-size: .72rem; margin-top: .1rem; }
+  .form-section { padding: 1.5rem 1.75rem; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1.1rem; margin-bottom: 1.1rem; }
+  .form-row.single { grid-template-columns: 1fr; }
+  .form-row.triple { grid-template-columns: 1fr 1fr 1fr; }
+  @media (max-width: 640px) { .form-row, .form-row.triple { grid-template-columns: 1fr; } .loan-types { grid-template-columns: repeat(2, 1fr); } }
+  .field { display: flex; flex-direction: column; gap: .35rem; }
+  .field label { font-size: .75rem; font-weight: 600; color: var(--navy); text-transform: uppercase; letter-spacing: .06em; }
+  .field label .req { color: var(--gold); margin-left: .15rem; }
+  .field label .note { color: var(--mid); font-weight: 400; text-transform: none; letter-spacing: 0; font-size: .7rem; }
+  .field input, .field select, .field textarea { border: 1.5px solid var(--border); border-radius: var(--radius); padding: .65rem .9rem; font-family: 'DM Sans', sans-serif; font-size: .92rem; color: var(--navy); background: var(--cream); transition: border-color .2s, box-shadow .2s, background .2s; width: 100%; outline: none; }
+  .field input:focus, .field select:focus, .field textarea:focus { border-color: var(--navy); background: var(--white); box-shadow: 0 0 0 3px rgba(13,31,60,.08); }
+  .field input.readonly-filled { background: #f0f7ff; border-color: #b3d1f5; color: var(--navy); font-weight: 600; cursor: default; }
+  .field textarea { resize: vertical; min-height: 90px; }
+  .field select { cursor: pointer; }
+  .field-hint { font-size: .7rem; color: var(--mid); margin-top: -.1rem; }
+  .field-error { font-size: .7rem; color: var(--error); display: none; }
+  .field.has-error input, .field.has-error select, .field.has-error textarea { border-color: var(--error); background: #fff5f5; }
+  .field.has-error .field-error { display: block; }
+  .purpose-table { border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin-bottom: .5rem; }
+  .pt-header { display: grid; grid-template-columns: .4fr 2fr 1fr; background: var(--navy); padding: .65rem .85rem; color: rgba(255,255,255,.8); font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; }
+  .pt-row { display: grid; grid-template-columns: .4fr 2fr 1fr; padding: .5rem .85rem; gap: .5rem; align-items: center; border-bottom: 1px solid var(--border); background: var(--white); }
+  .pt-row:last-child { border-bottom: none; }
+  .pt-row input { border: 1px solid var(--border); border-radius: 4px; padding: .4rem .6rem; font-family: 'DM Sans', sans-serif; font-size: .82rem; background: var(--cream); width: 100%; outline: none; }
+  .pt-row input:focus { border-color: var(--navy); background: var(--white); }
+  .security-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; }
+  .declaration-box { background: var(--offwhite); border: 1px solid var(--border); border-left: 4px solid var(--gold); border-radius: 6px; padding: 1.1rem 1.25rem; font-size: .82rem; line-height: 1.65; color: #444; margin-bottom: 1.25rem; }
+  .declaration-box strong { color: var(--navy); }
+  .checkbox-row { display: flex; gap: .75rem; align-items: flex-start; margin-top: 1rem; }
+  .checkbox-row input[type=checkbox] { width: 18px; height: 18px; flex-shrink: 0; margin-top: .15rem; accent-color: var(--navy); cursor: pointer; }
+  .checkbox-row label { font-size: .85rem; color: var(--navy); cursor: pointer; line-height: 1.5; }
+  .btn-row { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; padding: 1.5rem 1.75rem; background: var(--offwhite); border-top: 1px solid var(--border); }
+  .btn { display: inline-flex; align-items: center; gap: .5rem; padding: .75rem 1.75rem; border-radius: var(--radius); font-family: 'DM Sans', sans-serif; font-size: .88rem; font-weight: 600; cursor: pointer; border: none; transition: all .2s; letter-spacing: .02em; }
+  .btn-primary { background: var(--navy); color: var(--white); box-shadow: 0 3px 12px rgba(13,31,60,.25); }
+  .btn-primary:hover { background: #0a1829; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(13,31,60,.3); }
+  .btn-primary:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+  .btn-secondary { background: transparent; color: var(--navy); border: 1.5px solid var(--border); }
+  .btn-secondary:hover { border-color: var(--navy); background: var(--offwhite); }
+  .btn-gold { background: var(--gold); color: var(--navy); font-weight: 700; box-shadow: 0 3px 12px rgba(201,168,76,.35); }
+  .btn-gold:hover { background: var(--gold2); transform: translateY(-1px); }
+  .alert { padding: .9rem 1.25rem; border-radius: 8px; font-size: .85rem; display: flex; align-items: flex-start; gap: .75rem; margin-bottom: 1rem; display: none; }
+  .alert.show { display: flex; }
+  .alert-icon { font-size: 1.1rem; flex-shrink: 0; }
+  .alert-error { background: #fff5f5; border: 1px solid #fca5a5; color: #7f1d1d; }
+  .alert-success { background: #f0fdf4; border: 1px solid #86efac; color: #14532d; }
+  .alert-info { background: #eff6ff; border: 1px solid #93c5fd; color: #1e3a8a; }
+  .alert-warning { background: #fffbeb; border: 1px solid #fcd34d; color: #78350f; }
+  .success-screen { display: none; text-align: center; padding: 4rem 2rem; background: var(--white); border: 1px solid var(--border); border-radius: 12px; box-shadow: var(--shadow); animation: slideIn .4s ease; }
+  .success-screen.show { display: block; }
+  .success-icon-ring { width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, #d4edda, #a8d5b5); border: 3px solid #5cb85c; display: flex; align-items: center; justify-content: center; font-size: 2.2rem; margin: 0 auto 1.5rem; animation: popIn .5s .2s both cubic-bezier(.34,1.56,.64,1); }
+  @keyframes popIn { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  .success-screen h2 { font-family: 'Playfair Display', serif; font-size: 1.8rem; font-weight: 900; color: var(--navy); margin-bottom: .5rem; }
+  .success-screen p { color: var(--mid); font-size: .92rem; line-height: 1.6; }
+  .app-id-display { display: inline-block; margin: 1.25rem auto 0; background: var(--navy); color: var(--gold); font-family: 'DM Mono', monospace; font-size: 1.1rem; font-weight: 500; padding: .6rem 1.5rem; border-radius: 6px; letter-spacing: .1em; }
+  .spinner { width: 18px; height: 18px; border: 2px solid rgba(255,255,255,.4); border-top-color: var(--white); border-radius: 50%; animation: spin .7s linear infinite; display: none; }
+  .spinner.show { display: block; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .verify-row { display: flex; gap: .75rem; align-items: flex-end; }
+  .verify-row .field { flex: 1; }
+  .verify-row .btn { flex-shrink: 0; align-self: flex-end; padding: .65rem 1.4rem; }
+  .progress-bar { display: flex; align-items: center; gap: 0; margin-bottom: 2rem; padding: 0 .5rem; }
+  .progress-step { display: flex; flex-direction: column; align-items: center; flex: 1; position: relative; }
+  .progress-step::after { content: ''; position: absolute; top: 18px; left: calc(50% + 18px); right: calc(-50% + 18px); height: 2px; background: var(--border); transition: background .4s; z-index: 0; }
+  .progress-step:last-child::after { display: none; }
+  .progress-step.done::after { background: var(--navy); }
+  .ps-circle { width: 36px; height: 36px; border-radius: 50%; border: 2px solid var(--border); background: var(--white); display: flex; align-items: center; justify-content: center; font-size: .8rem; font-weight: 700; color: var(--mid); position: relative; z-index: 1; transition: all .3s; }
+  .progress-step.active .ps-circle { border-color: var(--navy); background: var(--navy); color: var(--white); }
+  .progress-step.done .ps-circle { border-color: var(--success); background: var(--success); color: var(--white); }
+  .ps-label { font-size: .65rem; font-weight: 600; color: var(--mid); text-transform: uppercase; letter-spacing: .06em; margin-top: .4rem; text-align: center; }
+  .progress-step.active .ps-label, .progress-step.done .ps-label { color: var(--navy); }
+  .required-note { font-size: .75rem; color: var(--mid); margin-bottom: 1.25rem; }
+  .required-note span { color: var(--gold); }
+  .waiting-screen { display: none; text-align: center; padding: 3rem 2rem; background: #fff; border: 1px solid var(--border); border-radius: 12px; box-shadow: var(--shadow); }
+  .waiting-screen.show { display: block; }
+  .waiting-icon { font-size: 2.4rem; margin-bottom: 1rem; }
+  .waiting-screen h2 { font-family: 'Playfair Display',serif; font-size: 1.4rem; color: var(--navy); margin-bottom: .5rem; }
+  .waiting-list { max-width: 420px; margin: 1.5rem auto; text-align: left; }
+  .waiting-row { display: flex; justify-content: space-between; align-items: center; padding: .6rem .9rem; border: 1px solid var(--border); border-radius: 8px; margin-bottom: .5rem; background: var(--cream); }
+  .waiting-row b { font-size: .85rem; color: var(--navy); }
+  .waiting-badge { font-size: .7rem; font-weight: 700; padding: 3px 10px; border-radius: 20px; }
+  .wb-pending { background:#fff3cd; color:#856404; } .wb-accepted { background:#d4edda; color:#155724; } .wb-declined { background:#f8d7da; color:#721c24; }
+  .g-picker { border:1px solid var(--border); border-radius:8px; padding:1rem; background:var(--white); }
+  .g-picker .search-wrap { position:relative; margin-bottom:.9rem; }
+  .g-picker input.g-search { width:100%; padding:.7rem .9rem; border:1.5px solid var(--border); border-radius:6px; font-size:.9rem; background:var(--cream); font-family:'DM Sans',sans-serif; }
+  .g-picker input.g-search:focus { outline:none; border-color:var(--navy); background:#fff; }
+  .g-results { position:absolute; left:0; right:0; top:calc(100% + 4px); background:#fff; border:1px solid var(--border); border-radius:8px; box-shadow:0 8px 24px rgba(13,31,60,.15); max-height:220px; overflow-y:auto; z-index:20; display:none; }
+  .g-results.show { display:block; }
+  .g-result-row { padding:.6rem .9rem; cursor:pointer; border-bottom:1px solid #f0f0f0; font-size:.85rem; }
+  .g-result-row:hover { background:var(--cream); }
+  .g-result-row .gr-name { font-weight:700; color:var(--navy); }
+  .g-result-row .gr-meta { font-size:.72rem; color:var(--mid); }
+  .g-empty-note { font-size:.72rem; color:var(--mid); padding:.4rem .2rem; }
+  .g-chips { display:flex; flex-direction:column; gap:.5rem; }
+  .g-chip { display:flex; justify-content:space-between; align-items:center; border:1.5px solid var(--border); border-radius:8px; padding:.6rem .9rem; background:var(--cream); }
+  .g-chip .gc-info b { display:block; font-size:.88rem; color:var(--navy); }
+  .g-chip .gc-info span { font-size:.72rem; color:var(--mid); }
+  .g-chip button { background:none; border:none; color:var(--error); font-size:1.1rem; cursor:pointer; line-height:1; }
+  .g-count-note { font-size:.75rem; color:var(--mid); margin-top:.6rem; }
+  @media (max-width: 500px) { .btn-row { flex-direction: column; } .btn { width: 100%; justify-content: center; } .verify-row { flex-direction: column; } }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <div class="logo-block">
+      <div class="logo-emblem"><img src="assets/logo.png" alt="Sansteel SACCO Logo"/></div>
+      <div class="logo-text"><strong>Sansteel SACCO</strong><span>Savings &amp; Credit Co-operative Society</span></div>
+    </div>
+    <div class="header-badge">Member Portal</div>
+  </div>
+</header>
+
+<main class="main">
+  <div class="page-title">
+    <h1>Loan Application</h1>
+    <p>P.O. Box 20496 – 00200, Nairobi</p>
+    <div class="gold-bar"></div>
+  </div>
+
+  <div class="progress-bar" id="progressBar">
+    <div class="progress-step active" id="step1Track"><div class="ps-circle">1</div><div class="ps-label">Verify</div></div>
+    <div class="progress-step" id="step2Track"><div class="ps-circle">2</div><div class="ps-label">Loan Type</div></div>
+    <div class="progress-step" id="step3Track"><div class="ps-circle">3</div><div class="ps-label">Application</div></div>
+    <div class="progress-step" id="step4Track"><div class="ps-circle">4</div><div class="ps-label">Submitted</div></div>
+  </div>
+
+  <div class="verify-card" id="verifySection">
+    <div class="card-header"><div class="step-badge">1</div><div><h2>Member Identity Verification</h2><p>Enter your National ID to look up your account and eligibility</p></div></div>
+    <div class="card-body">
+      <div id="verifyAlert" class="alert"></div>
+      <div class="verify-row">
+        <div class="field" id="fldNationalId"><label>National ID Number <span class="req">*</span></label><input type="text" id="nationalId" placeholder="e.g. 25342410" inputmode="numeric" autocomplete="off"/><span class="field-error">Please enter a valid National ID number.</span></div>
+        <button class="btn btn-gold" onclick="verifyMember()"><span id="verifyBtnText">🔍 Verify</span><div class="spinner" id="verifySpinner"></div></button>
+      </div>
+      <div class="member-info" id="memberInfo">
+        <div class="info-item"><label>Full Name</label><span id="infoName">—</span></div>
+        <div class="info-item"><label>Membership No.</label><span id="infoRegNo">—</span></div>
+        <div class="info-item"><label>Phone</label><span id="infoPhone">—</span></div>
+        <div class="info-item"><label>Status</label><span id="infoStatus">—</span></div>
+        <div class="info-item"><label>Account Balance (KES)</label><span id="infoBalance">—</span></div>
+        <div class="info-item"><label>Existing Loan Balance (KES)</label><span id="infoLoanBal">—</span></div>
+      </div>
+      <div class="max-loan-highlight" id="maxLoanDisplay" style="display:none"><div class="mla-icon">💰</div><div class="mla-text"><label>Your Maximum Eligible Loan Amount</label><span id="infoMaxLoan">KES 0</span></div></div>
+    </div>
+  </div>
+
+  <div class="verify-card" id="loanTypeSection" style="display:none">
+    <div class="card-header"><div class="step-badge">2</div><div><h2>Select Loan Type</h2><p>Choose the type of loan you wish to apply for</p></div></div>
+    <div class="card-body">
+      <div id="loanTypeAlert" class="alert alert-warning"><span class="alert-icon">⚠️</span><span id="loanTypeAlertMsg"></span></div>
+      <div class="loan-types">
+        <button class="loan-type-btn" onclick="selectLoanType('development')" id="lt-development"><div class="check-mark">✓</div><span class="lt-icon">🏗️</span><div class="lt-name">Development Loan</div><div class="lt-desc">Long-term financing for growth &amp; investment</div></button>
+        <button class="loan-type-btn" onclick="selectLoanType('emergency')" id="lt-emergency"><div class="check-mark">✓</div><span class="lt-icon">🚨</span><div class="lt-name">Emergency Loan</div><div class="lt-desc">Urgent short-term financial relief</div></button>
+        <button class="loan-type-btn" onclick="selectLoanType('instant')" id="lt-instant"><div class="check-mark">✓</div><span class="lt-icon">⚡</span><div class="lt-name">Instant Loan</div><div class="lt-desc">Quick access with minimal requirements</div></button>
+        <button class="loan-type-btn" onclick="selectLoanType('item')" id="lt-item"><div class="check-mark">✓</div><span class="lt-icon">🛒</span><div class="lt-name">Item Loan</div><div class="lt-desc">Finance for specific item purchases</div></button>
+        <button class="loan-type-btn" onclick="selectLoanType('backtowork')" id="lt-backtowork"><div class="check-mark">✓</div><span class="lt-icon">🎄</span><div class="lt-name">Christmas / Back to Work</div><div class="lt-desc">Seasonal loan for festive &amp; restart needs</div></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Development -->
+  <div class="form-card" id="form-development">
+    <div class="card-header"><div class="step-badge">3</div><div><h2>Development Loan Application Form</h2><p>Fill all sections in block letters</p></div></div>
+    <div class="section-divider"><div class="sd-num">A</div><div><h3>Applicant Details</h3></div></div>
+    <div class="form-section">
+      <p class="required-note">Fields marked <span>*</span> are required.</p>
+      <div class="form-row"><div class="field"><label>Member's Name <span class="req">*</span></label><input type="text" id="dev_name" class="readonly-filled" readonly/></div><div class="field"><label>Membership No. <span class="req">*</span></label><input type="text" id="dev_regNo" class="readonly-filled" readonly/></div></div>
+      <div class="form-row"><div class="field"><label>Member's Address <span class="req">*</span></label><input type="text" id="dev_address" placeholder="Physical/postal address"/></div><div class="field"><label>ID No. <span class="req">*</span></label><input type="text" id="dev_idno" class="readonly-filled" readonly/></div></div>
+      <div class="form-row"><div class="field"><label>Telephone No. <span class="req">*</span></label><input type="tel" id="dev_phone" class="readonly-filled" readonly/></div><div class="field"><label>Present Net Income / Month (KES) <span class="req">*</span></label><input type="number" id="dev_income" placeholder="e.g. 45000" min="0"/></div></div>
+      <div class="form-row"><div class="field"><label>Email Address</label><input type="email" id="dev_email" placeholder="member@email.com"/></div><div class="field"><label>Position Held in Society</label><input type="text" id="dev_position" placeholder="e.g. Ordinary Member, Chairman"/></div></div>
+    </div>
+    <div class="section-divider"><div class="sd-num">B</div><div><h3>Loan Application &amp; Repayment</h3></div></div>
+    <div class="form-section">
+      <div class="form-row triple">
+        <div class="field"><label>Loan Amount (KES) <span class="req">*</span> <span class="note" id="dev_maxNote"></span></label><input type="number" id="dev_amount" placeholder="e.g. 100000" min="1" oninput="checkAmount('dev_amount','dev_amountError')"/><span class="field-error" id="dev_amountError"></span></div>
+        <div class="field"><label>Amount in Words <span class="req">*</span></label><input type="text" id="dev_amountWords" placeholder="e.g. One Hundred Thousand Only"/></div>
+        <div class="field"><label>Period (Months) <span class="req">*</span></label><input type="number" id="dev_months" placeholder="e.g. 12" min="1" max="60"/></div>
+      </div>
+      <div class="form-row"><div class="field"><label>Monthly Installment (KES) <span class="req">*</span></label><input type="number" id="dev_installment" placeholder="e.g. 9000" min="1"/></div><div class="field"><label>Commencing Date <span class="req">*</span></label><input type="date" id="dev_commenceDate"/></div></div>
+      <label style="font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--navy);display:block;margin-bottom:.75rem;">Purpose of Loan <span class="req">*</span></label>
+      <div class="purpose-table"><div class="pt-header"><span>#</span><span>Purpose Description</span><span>Amount (KES)</span></div>
+        <div class="pt-row"><span style="color:var(--mid);font-size:.75rem;">1</span><input type="text" id="dev_p1d" placeholder="Description"/><input type="number" id="dev_p1a" placeholder="0" min="0"/></div>
+        <div class="pt-row"><span style="color:var(--mid);font-size:.75rem;">2</span><input type="text" id="dev_p2d" placeholder="Description"/><input type="number" id="dev_p2a" placeholder="0" min="0"/></div>
+        <div class="pt-row"><span style="color:var(--mid);font-size:.75rem;">3</span><input type="text" id="dev_p3d" placeholder="Description"/><input type="number" id="dev_p3a" placeholder="0" min="0"/></div>
+      </div>
+      <label style="font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--navy);display:block;margin:.75rem 0 .5rem;">Security Offered for the Loan</label>
+      <div class="security-grid"><div class="field"><input type="text" id="dev_sec1" placeholder="Security 1"/></div><div class="field"><input type="text" id="dev_sec2" placeholder="Security 2"/></div><div class="field"><input type="text" id="dev_sec3" placeholder="Security 3"/></div><div class="field"><input type="text" id="dev_sec4" placeholder="Any other movable/non-movable property"/></div></div>
+    </div>
+    <div class="section-divider"><div class="sd-num">C</div><div><h3>Declaration &amp; Witness</h3></div></div>
+    <div class="form-section">
+      <div class="declaration-box">I hereby declare that the foregoing particulars are true to the best of my knowledge and belief and agree to abide by the by-laws of the society, the loan policy and any variations by the credit committee in respect of (Loan application &amp; repayment). I hereby authorize the necessary deductions, including percentage interests monthly to be made from my salary/remittance as repayment of this loan.</div>
+      <div class="form-row"><div class="field"><label>Witness Name <span class="req">*</span></label><input type="text" id="dev_witnessName" placeholder="Full name"/></div><div class="field"><label>Witness ID No.</label><input type="text" id="dev_witnessIdNo" placeholder="National ID No."/></div></div>
+      <div class="form-row"><div class="field"><label>Witness Tel / Email</label><input type="text" id="dev_witnessTel" placeholder="0700000000 / email"/></div><div class="field"><label>Witness Address</label><input type="text" id="dev_witnessAddr" placeholder="Address"/></div></div>
+      <div class="checkbox-row"><input type="checkbox" id="dev_declare"/><label for="dev_declare">I confirm the above declaration is true and accurate, and I agree to the SACCO's by-laws and loan policy. <span style="color:var(--gold);font-weight:700;">*</span></label></div>
+    </div>
+    <div class="section-divider"><div class="sd-num">D</div><div><h3>Repayment Guarantee — Guarantors</h3><p>Up to 30 guarantors; Minimum 1 required</p></div></div>
+    <div class="form-section"><p style="font-size:.8rem;color:var(--mid);margin-bottom:1rem;">We, the undersigned, hereby accept joint liability for the loan in the event of the borrower's default.</p><div class="g-picker" id="picker-development"></div></div>
+    <div class="btn-row"><button class="btn btn-primary" onclick="submitForm('development')" id="devSubmitBtn"><span>Send Guarantor Request</span><div class="spinner" id="devSpinner"></div></button><button class="btn btn-secondary" onclick="resetAll()">← Start Over</button></div>
+  </div>
+
+  <!-- Emergency -->
+  <div class="form-card" id="form-emergency">
+    <div class="card-header"><div class="step-badge">3</div><div><h2>Emergency Loan Application Form</h2><p>Fill all sections in block letters</p></div></div>
+    <div class="section-divider"><div class="sd-num">A</div><div><h3>Applicant Details</h3></div></div>
+    <div class="form-section">
+      <p class="required-note">Fields marked <span>*</span> are required.</p>
+      <div class="form-row"><div class="field"><label>Member's Name <span class="req">*</span></label><input type="text" id="em_name" class="readonly-filled" readonly/></div><div class="field"><label>Membership No. <span class="req">*</span></label><input type="text" id="em_regNo" class="readonly-filled" readonly/></div></div>
+      <div class="form-row"><div class="field"><label>Member's Address <span class="req">*</span></label><input type="text" id="em_address" placeholder="Physical/postal address"/></div><div class="field"><label>ID No. <span class="req">*</span></label><input type="text" id="em_idno" class="readonly-filled" readonly/></div></div>
+      <div class="form-row"><div class="field"><label>Telephone No. <span class="req">*</span></label><input type="tel" id="em_phone" class="readonly-filled" readonly/></div><div class="field"><label>Present Net Income / Month (KES) <span class="req">*</span></label><input type="number" id="em_income" placeholder="e.g. 45000" min="0"/></div></div>
+      <div class="form-row"><div class="field"><label>Email Address</label><input type="email" id="em_email" placeholder="member@email.com"/></div><div class="field"><label>Position Held in Society</label><input type="text" id="em_position" placeholder="e.g. Ordinary Member"/></div></div>
+    </div>
+    <div class="section-divider"><div class="sd-num">B</div><div><h3>Loan Application &amp; Repayment</h3></div></div>
+    <div class="form-section">
+      <div class="form-row triple">
+        <div class="field"><label>Loan Amount (KES) <span class="req">*</span> <span class="note" id="em_maxNote"></span></label><input type="number" id="em_amount" placeholder="e.g. 50000" min="1" oninput="checkAmount('em_amount','em_amountError')"/><span class="field-error" id="em_amountError"></span></div>
+        <div class="field"><label>Amount in Words <span class="req">*</span></label><input type="text" id="em_amountWords" placeholder="e.g. Fifty Thousand Only"/></div>
+        <div class="field"><label>Period (Months) <span class="req">*</span></label><input type="number" id="em_months" placeholder="e.g. 6" min="1" max="36"/></div>
+      </div>
+      <div class="form-row"><div class="field"><label>Monthly Installment (KES) <span class="req">*</span></label><input type="number" id="em_installment" placeholder="e.g. 9000" min="1"/></div><div class="field"><label>Commencing Date <span class="req">*</span></label><input type="date" id="em_commenceDate"/></div></div>
+      <label style="font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--navy);display:block;margin-bottom:.75rem;">Purpose of Loan <span class="req">*</span></label>
+      <div class="purpose-table"><div class="pt-header"><span>#</span><span>Purpose Description</span><span>Amount (KES)</span></div>
+        <div class="pt-row"><span style="color:var(--mid);font-size:.75rem;">1</span><input type="text" id="em_p1d" placeholder="Description"/><input type="number" id="em_p1a" placeholder="0" min="0"/></div>
+        <div class="pt-row"><span style="color:var(--mid);font-size:.75rem;">2</span><input type="text" id="em_p2d" placeholder="Description"/><input type="number" id="em_p2a" placeholder="0" min="0"/></div>
+        <div class="pt-row"><span style="color:var(--mid);font-size:.75rem;">3</span><input type="text" id="em_p3d" placeholder="Description"/><input type="number" id="em_p3a" placeholder="0" min="0"/></div>
+      </div>
+      <label style="font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--navy);display:block;margin:.75rem 0 .5rem;">Security Offered for the Loan</label>
+      <div class="security-grid"><div class="field"><input type="text" id="em_sec1" placeholder="Security 1"/></div><div class="field"><input type="text" id="em_sec2" placeholder="Security 2"/></div><div class="field"><input type="text" id="em_sec3" placeholder="Security 3"/></div><div class="field"><input type="text" id="em_sec4" placeholder="Any other movable/non-movable property"/></div></div>
+    </div>
+    <div class="section-divider"><div class="sd-num">C</div><div><h3>Declaration &amp; Witness</h3></div></div>
+    <div class="form-section">
+      <div class="declaration-box">I hereby declare that the foregoing particulars are true to the best of my knowledge and belief and agree to abide by the by-laws of the society, the loan policy and any variations by the credit committee in respect of (Loan application &amp; repayment).</div>
+      <div class="form-row"><div class="field"><label>Witness Name <span class="req">*</span></label><input type="text" id="em_witnessName" placeholder="Full name"/></div><div class="field"><label>Witness ID No.</label><input type="text" id="em_witnessIdNo" placeholder="National ID No."/></div></div>
+      <div class="form-row"><div class="field"><label>Witness Tel / Email</label><input type="text" id="em_witnessTel" placeholder="0700000000 / email"/></div><div class="field"><label>Witness Address</label><input type="text" id="em_witnessAddr" placeholder="Address"/></div></div>
+      <div class="checkbox-row"><input type="checkbox" id="em_declare"/><label for="em_declare">I confirm the above declaration is true and I agree to the SACCO's by-laws and loan policy. <span style="color:var(--gold);font-weight:700;">*</span></label></div>
+    </div>
+    <div class="section-divider"><div class="sd-num">D</div><div><h3>Repayment Guarantee — Guarantors</h3><p>Up to 10 guarantors; Minimum 1 required</p></div></div>
+    <div class="form-section"><div class="g-picker" id="picker-emergency"></div></div>
+    <div class="btn-row"><button class="btn btn-primary" onclick="submitForm('emergency')" id="emSubmitBtn"><span>Send Guarantor Request</span><div class="spinner" id="emSpinner"></div></button><button class="btn btn-secondary" onclick="resetAll()">← Start Over</button></div>
+  </div>
+
+  <!-- Instant -->
+  <div class="form-card" id="form-instant">
+    <div class="card-header"><div class="step-badge">3</div><div><h2>Instant Loan Application Form</h2><p>Fill all sections in block letters</p></div></div>
+    <div class="section-divider"><div class="sd-num">A</div><div><h3>Applicant Details</h3></div></div>
+    <div class="form-section">
+      <p class="required-note">Fields marked <span>*</span> are required.</p>
+      <div class="form-row"><div class="field"><label>Member's Name <span class="req">*</span></label><input type="text" id="ins_name" class="readonly-filled" readonly/></div><div class="field"><label>Membership No. <span class="req">*</span></label><input type="text" id="ins_regNo" class="readonly-filled" readonly/></div></div>
+      <div class="form-row"><div class="field"><label>ID / Passport No. <span class="req">*</span></label><input type="text" id="ins_idno" class="readonly-filled" readonly/></div><div class="field"><label>Current Income (KES) <span class="req">*</span></label><input type="number" id="ins_income" placeholder="e.g. 45000" min="0"/></div></div>
+      <div class="form-row single"><div class="field"><label>Date <span class="req">*</span></label><input type="date" id="ins_date"/></div></div>
+    </div>
+    <div class="section-divider"><div class="sd-num">B</div><div><h3>Loan Application &amp; Repayment</h3></div></div>
+    <div class="form-section">
+      <div class="form-row triple">
+        <div class="field"><label>Loan Amount (KES) <span class="req">*</span> <span class="note" id="ins_maxNote"></span></label><input type="number" id="ins_amount" placeholder="e.g. 20000" min="1" oninput="checkAmount('ins_amount','ins_amountError')"/><span class="field-error" id="ins_amountError"></span></div>
+        <div class="field"><label>Period (Months) <span class="req">*</span></label><input type="number" id="ins_months" placeholder="e.g. 3" min="1" max="12"/></div>
+        <div class="field"><label>Monthly Installment (KES) <span class="req">*</span></label><input type="number" id="ins_installment" placeholder="e.g. 7000" min="1"/></div>
+      </div>
+      <div class="form-row single"><div class="field"><label>Commencing Date <span class="req">*</span></label><input type="date" id="ins_commenceDate"/></div></div>
+    </div>
+    <div class="section-divider"><div class="sd-num">C</div><div><h3>Guarantor</h3><p>1 Guarantor required</p></div></div>
+    <div class="form-section"><p style="font-size:.8rem;color:var(--mid);margin-bottom:.85rem;">I accept liability for the repayment of the above loan in the event of the borrower's default.</p><div class="g-picker" id="picker-instant"></div><div class="checkbox-row" style="margin-top:.5rem"><input type="checkbox" id="ins_declare"/><label for="ins_declare">I confirm my information is accurate and I agree to the SACCO's by-laws and loan policy. <span style="color:var(--gold);font-weight:700;">*</span></label></div></div>
+    <div class="btn-row"><button class="btn btn-primary" onclick="submitForm('instant')" id="insSubmitBtn"><span>Send Guarantor Request</span><div class="spinner" id="insSpinner"></div></button><button class="btn btn-secondary" onclick="resetAll()">← Start Over</button></div>
+  </div>
+
+  <!-- Item -->
+  <div class="form-card" id="form-item">
+    <div class="card-header"><div class="step-badge">3</div><div><h2>Item Loan Application Form</h2><p>Fill all sections in block letters</p></div></div>
+    <div class="section-divider"><div class="sd-num">A</div><div><h3>Applicant Details</h3></div></div>
+    <div class="form-section">
+      <p class="required-note">Fields marked <span>*</span> are required.</p>
+      <div class="form-row"><div class="field"><label>Member's Name <span class="req">*</span></label><input type="text" id="it_name" class="readonly-filled" readonly/></div><div class="field"><label>Membership No. <span class="req">*</span></label><input type="text" id="it_regNo" class="readonly-filled" readonly/></div></div>
+      <div class="form-row"><div class="field"><label>ID No. <span class="req">*</span></label><input type="text" id="it_idno" class="readonly-filled" readonly/></div><div class="field"><label>Current Income (KES) <span class="req">*</span></label><input type="number" id="it_income" placeholder="e.g. 45000" min="0"/></div></div>
+      <div class="form-row single"><div class="field"><label>Date <span class="req">*</span></label><input type="date" id="it_date"/></div></div>
+    </div>
+    <div class="section-divider"><div class="sd-num">B</div><div><h3>Item Loan Details</h3></div></div>
+    <div class="form-section">
+      <div class="form-row"><div class="field"><label>Item Description <span class="req">*</span></label><input type="text" id="it_item" placeholder="e.g. Laptop, Refrigerator, Motorbike"/></div><div class="field"><label>Item Value / Loan Amount (KES) <span class="req">*</span> <span class="note" id="it_maxNote"></span></label><input type="number" id="it_amount" placeholder="e.g. 35000" min="1" oninput="checkAmount('it_amount','it_amountError')"/><span class="field-error" id="it_amountError"></span></div></div>
+      <div class="form-row"><div class="field"><label>Repayment Period (Months) <span class="req">*</span></label><input type="number" id="it_months" placeholder="e.g. 12" min="1" max="36"/></div><div class="field"><label>Monthly Rate (KES incl. interest) <span class="req">*</span></label><input type="number" id="it_rate" placeholder="e.g. 3200" min="1"/></div></div>
+      <div class="checkbox-row" style="margin-top:.25rem"><input type="checkbox" id="it_declare"/><label for="it_declare">I declare the information given is true and I agree to abide by the SACCO's by-laws and loan policy. <span style="color:var(--gold);font-weight:700;">*</span></label></div>
+    </div>
+    <div class="section-divider"><div class="sd-num">C</div><div><h3>Guarantors</h3><p>Up to 3 guarantors; Minimum 1 required</p></div></div>
+    <div class="form-section"><div class="g-picker" id="picker-item"></div></div>
+    <div class="btn-row"><button class="btn btn-primary" onclick="submitForm('item')" id="itSubmitBtn"><span>Send Guarantor Request</span><div class="spinner" id="itSpinner"></div></button><button class="btn btn-secondary" onclick="resetAll()">← Start Over</button></div>
+  </div>
+
+  <!-- Back to Work -->
+  <div class="form-card" id="form-backtowork">
+    <div class="card-header"><div class="step-badge">3</div><div><h2>Christmas / Back to Work Loan Application Form</h2><p>Fill all sections in block letters</p></div></div>
+    <div class="section-divider"><div class="sd-num">A</div><div><h3>Applicant Details</h3></div></div>
+    <div class="form-section">
+      <p class="required-note">Fields marked <span>*</span> are required.</p>
+      <div class="form-row"><div class="field"><label>Member's Name <span class="req">*</span></label><input type="text" id="bw_name" class="readonly-filled" readonly/></div><div class="field"><label>Membership No. <span class="req">*</span></label><input type="text" id="bw_regNo" class="readonly-filled" readonly/></div></div>
+      <div class="form-row"><div class="field"><label>ID / Passport No. <span class="req">*</span></label><input type="text" id="bw_idno" class="readonly-filled" readonly/></div><div class="field"><label>Current Income (KES) <span class="req">*</span></label><input type="number" id="bw_income" placeholder="e.g. 45000" min="0"/></div></div>
+      <div class="form-row single"><div class="field"><label>Date <span class="req">*</span></label><input type="date" id="bw_date"/></div></div>
+    </div>
+    <div class="section-divider"><div class="sd-num">B</div><div><h3>Loan Application &amp; Repayment</h3></div></div>
+    <div class="form-section">
+      <div class="form-row triple">
+        <div class="field"><label>Loan Amount (KES) <span class="req">*</span> <span class="note" id="bw_maxNote"></span></label><input type="number" id="bw_amount" placeholder="e.g. 30000" min="1" oninput="checkAmount('bw_amount','bw_amountError')"/><span class="field-error" id="bw_amountError"></span></div>
+        <div class="field"><label>Period (Months) <span class="req">*</span></label><input type="number" id="bw_months" placeholder="e.g. 3" min="1" max="12"/></div>
+        <div class="field"><label>Monthly Installment (KES) <span class="req">*</span></label><input type="number" id="bw_installment" placeholder="e.g. 10500" min="1"/></div>
+      </div>
+      <div class="form-row single"><div class="field"><label>Interest Rate (%) <span class="req">*</span></label><input type="number" id="bw_interest" placeholder="e.g. 1" step="0.1" min="0"/><span class="field-hint">Percentage interest on reducing balance</span></div></div>
+      <div class="checkbox-row"><input type="checkbox" id="bw_declare"/><label for="bw_declare">I declare the information given is true and I agree to abide by the SACCO's by-laws and loan policy. <span style="color:var(--gold);font-weight:700;">*</span></label></div>
+    </div>
+    <div class="section-divider"><div class="sd-num">C</div><div><h3>Guarantors</h3><p>Up to 2 guarantors; Minimum 1 required</p></div></div>
+    <div class="form-section"><p style="font-size:.8rem;color:var(--mid);margin-bottom:.85rem;">We jointly accept liability for the repayment of the above loan in the event of borrower's default.</p><div class="g-picker" id="picker-backtowork"></div></div>
+    <div class="btn-row"><button class="btn btn-primary" onclick="submitForm('backtowork')" id="bwSubmitBtn"><span>Send Guarantor Request</span><div class="spinner" id="bwSpinner"></div></button><button class="btn btn-secondary" onclick="resetAll()">← Start Over</button></div>
+  </div>
+
+  <div class="waiting-screen" id="waitingScreen">
+    <div class="waiting-icon">⏳</div>
+    <h2>Guarantor Requests Sent</h2>
+    <p style="color:var(--mid);font-size:.9rem;">Your selected guarantors have been notified. The application will unlock for submission once everyone has accepted. You can close this page and check back later — just revisit this loan application link.</p>
+    <div class="waiting-list" id="waitingList"></div>
+    <div id="waitingActions"><button class="btn btn-primary" id="finalSubmitBtn" onclick="finalizeApplication()" disabled>Submit Application</button><button class="btn btn-secondary" onclick="resetAll()">← Start Over</button></div>
+  </div>
+
+  <div class="success-screen" id="successScreen">
+    <div class="success-icon-ring">✅</div>
+    <h2>Application Submitted!</h2>
+    <p>Your loan application has been received and logged.<br/>The credit committee will review and contact you shortly.</p>
+    <div class="app-id-display" id="successAppId">LA-XXXXXXXX</div>
+    <br/><br/>
+    <button class="btn btn-primary" onclick="resetAll()" style="margin-top:1rem;">📋 New Application</button>
+  </div>
+</main>
+
+<script src="config.js"></script>
+<script src="app.js"></script>
+<script>
+let memberData = null;
+let selectedLoan = null;
+let maxLoanAmount = 0;
+let activeDraftId = null;
+let pollTimer = null;
+
+const LOAN_CAPS = { development: null, emergency: 40000, instant: 12000, item: null, backtowork: 8000 };
+const GUARANTOR_CONFIG = {
+  development: { id: "dev_guarantors", count: 30, type: "complex" },
+  emergency:   { id: "em_guarantors",  count: 10, type: "complex" },
+  instant:     { id: "ins_g1name",     count: 1,  type: "inline"  },
+  item:        { id: "it_guarantors",  count: 3,  type: "simple"  },
+  backtowork:  { id: "bw_guarantors",  count: 2,  type: "simple"  },
+};
+
+const guarantorPickers = {};
+function initGuarantorPicker(loanType) {
+  const mount = document.getElementById("picker-" + loanType);
+  if (!mount || mount.dataset.built) return;
+  mount.dataset.built = "1";
+  guarantorPickers[loanType] = { selected: [] };
+  const max = (GUARANTOR_CONFIG[loanType] && GUARANTOR_CONFIG[loanType].count) || 1;
+  mount.innerHTML = `<label style="font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--navy);display:block;margin-bottom:.6rem;">Select Guarantor${max > 1 ? "s" : ""} (SACCO members only) <span class="req">*</span></label>
+    <div class="search-wrap"><input type="text" class="g-search" placeholder="Search by name, ID, or membership no…" autocomplete="off"/><div class="g-results"></div></div>
+    <div class="g-chips"></div><div class="g-count-note">Selected <span class="gc-count">0</span> of ${max} allowed.</div>`;
+  const input = mount.querySelector(".g-search");
+  const results = mount.querySelector(".g-results");
+  const chips = mount.querySelector(".g-chips");
+  const countEl = mount.querySelector(".gc-count");
+  let debounceT;
+  input.addEventListener("input", () => {
+    clearTimeout(debounceT);
+    const q = input.value.trim();
+    if (!q) { results.classList.remove("show"); return; }
+    debounceT = setTimeout(async () => {
+      try {
+        const excludeId = memberData ? memberData.idNo : "";
+        const list = await jsonpCall("searchmembers", { q, exclude: excludeId });
+        renderResults(list);
+      } catch (e) { /* silent */ }
+    }, 300);
+  });
+  function renderResults(list) {
+    const picked = guarantorPickers[loanType].selected.map(g => g.idNo);
+    const filtered = list.filter(m => !picked.includes(m.idNo));
+    if (!filtered.length) { results.innerHTML = `<div class="g-empty-note">No matching active members found.</div>`; }
+    else {
+      results.innerHTML = filtered.map(m => `<div class="g-result-row" data-idno="${m.idNo}"><div class="gr-name">${m.name}</div><div class="gr-meta">ID ${m.idNo} · ${m.regNo || "—"} · ${m.phone || "—"}</div></div>`).join("");
+      results.querySelectorAll(".g-result-row").forEach(row => {
+        row.addEventListener("click", () => { const m = filtered.find(x => x.idNo === row.dataset.idno); addGuarantor(loanType, m, max, chips, countEl); input.value = ""; results.classList.remove("show"); });
+      });
+    }
+    results.classList.add("show");
+  }
+  document.addEventListener("click", (e) => { if (!mount.contains(e.target)) results.classList.remove("show"); });
+}
+function addGuarantor(loanType, member, max, chipsEl, countEl) {
+  const state = guarantorPickers[loanType];
+  if (state.selected.length >= max) { alert("You can select at most " + max + " guarantor(s) for this loan type."); return; }
+  if (state.selected.some(g => g.idNo === member.idNo)) return;
+  state.selected.push(member);
+  renderChips(loanType, chipsEl, countEl);
+}
+function removeGuarantor(loanType, idNo, chipsEl, countEl) { guarantorPickers[loanType].selected = guarantorPickers[loanType].selected.filter(g => g.idNo !== idNo); renderChips(loanType, chipsEl, countEl); }
+function renderChips(loanType, chipsEl, countEl) {
+  const state = guarantorPickers[loanType];
+  countEl.textContent = state.selected.length;
+  chipsEl.innerHTML = state.selected.map(g => `<div class="g-chip"><div class="gc-info"><b>${g.name}</b><span>ID ${g.idNo} · ${g.regNo || "—"} · ${g.phone || "—"}</span></div><button type="button" onclick="removeGuarantor('${loanType}','${g.idNo}', this.closest('.g-picker').querySelector('.g-chips'), this.closest('.g-picker').querySelector('.gc-count'))">✕</button></div>`).join("");
+}
+
+async function sendGuarantorRequests(loanType, payload) {
+  const state = guarantorPickers[loanType] || { selected: [] };
+  if (!state.selected.length) { alertUser("Please select at least one guarantor."); return; }
+  setSubmitting(loanType, true);
+  try {
+    const data = JSON.stringify({ loanType: payload.loanType, member: payload.member, details: payload.details, guarantorIds: state.selected.map(g => g.idNo) });
+    const res = await jsonpCall("createdraft", { data });
+    if (!res.success) { alertUser(res.error || "Could not send requests."); return; }
+    activeDraftId = res.draftId;
+    window.history.pushState({ draftId: res.draftId }, "", "loan.html?draft=" + res.draftId);
+    document.querySelectorAll(".form-card").forEach(c => c.classList.remove("show"));
+    document.getElementById("loanTypeSection").style.display = "none";
+    document.getElementById("waitingScreen").classList.add("show");
+    startPolling();
+  } catch (e) { alertUser("Connection error: " + e.message); }
+  finally { setSubmitting(loanType, false); }
+}
+
+function startPolling() { if (pollTimer) clearInterval(pollTimer); pollStatus(); pollTimer = setInterval(pollStatus, 6000); }
+async function pollStatus() {
+  if (!activeDraftId) return;
+  try {
+    const status = await jsonpCall("draftstatus", { id: activeDraftId });
+    if (!status) return;
+    renderWaiting(status);
+    if (status.anyDeclined) { if (pollTimer) clearInterval(pollTimer); showDeclinedState(); return; }
+    if (status.allAccepted) { document.getElementById("finalSubmitBtn").disabled = false; }
+  } catch (e) { /* retry next tick */ }
+}
+function showDeclinedState() {
+  document.getElementById("finalSubmitBtn").style.display = "none";
+  if (document.getElementById("declinedMsg")) return;
+  const msg = document.createElement("div");
+  msg.id = "declinedMsg";
+  msg.style.cssText = "background:#fdecea;border:1px solid #fca5a5;color:#a81c1c;border-radius:8px;padding:.9rem 1.1rem;margin-bottom:1rem;font-size:.88rem;text-align:left;";
+  msg.textContent = "⚠️ One of your guarantors has declined this request. This application cannot proceed — please start over and choose different guarantors.";
+  document.getElementById("waitingActions").parentNode.insertBefore(msg, document.getElementById("waitingActions"));
+}
+function renderWaiting(status) {
+  const list = document.getElementById("waitingList");
+  list.innerHTML = status.guarantors.map(g => { const cls = g.status === "Accepted" ? "wb-accepted" : g.status === "Declined" ? "wb-declined" : "wb-pending"; return `<div class="waiting-row"><b>${g.name}</b><span class="waiting-badge ${cls}">${g.status}${g.initials ? " · " + g.initials : ""}</span></div>`; }).join("");
+}
+async function finalizeApplication() {
+  if (!activeDraftId) return;
+  const btn = document.getElementById("finalSubmitBtn");
+  btn.disabled = true; btn.textContent = "Submitting…";
+  try {
+    const res = await jsonpCall("finalizeloan", { draftId: activeDraftId });
+    if (!res.success) { alertUser(res.error || "Could not submit yet."); btn.disabled = false; btn.textContent = "Submit Application"; return; }
+    if (pollTimer) clearInterval(pollTimer);
+    document.getElementById("waitingScreen").classList.remove("show");
+    document.getElementById("progressBar").style.display = "none";
+    document.getElementById("successScreen").classList.add("show");
+    document.getElementById("successAppId").textContent = res.appId;
+  } catch (e) { alertUser("Connection error: " + e.message); btn.disabled = false; btn.textContent = "Submit Application"; }
+}
+
+["development","emergency","instant","item","backtowork"].forEach(initGuarantorPicker);
+
+function setProgress(step) {
+  for (let i = 1; i <= 4; i++) {
+    const el = document.getElementById("step" + i + "Track");
+    if (!el) continue;
+    el.classList.remove("active","done");
+    if (i < step) el.classList.add("done");
+    if (i === step) el.classList.add("active");
+  }
+}
+function showAlert(id, type, msg) { const el = document.getElementById(id); if (!el) return; el.className = "alert alert-" + type + " show"; el.innerHTML = `<span class="alert-icon">${{error:"❌",success:"✅",info:"ℹ️",warning:"⚠️"}[type]}</span><span>${msg}</span>`; }
+function hideAlert(id) { const el = document.getElementById(id); if (el) el.className = "alert"; }
+
+async function verifyMember() {
+  hideAlert("verifyAlert");
+  const idInput = document.getElementById("nationalId").value.trim();
+  if (!idInput) { showAlert("verifyAlert","error","Please enter your National ID Number."); return; }
+  document.getElementById("verifyBtnText").textContent = "Checking…";
+  document.getElementById("verifySpinner").classList.add("show");
+  try {
+    const res = await jsonpCall("verify", { idNo: idInput });
+    if (!res.found) { showAlert("verifyAlert","error",`No member found with National ID <strong>${idInput}</strong>. Please check and try again.`); clearMemberDisplay(); return; }
+    if (res.status !== "Active") { showAlert("verifyAlert","warning",`Member <strong>${res.name}</strong> has an <strong>${res.status}</strong> account status. Please contact the SACCO office.`); clearMemberDisplay(); return; }
+    memberData = res;
+    maxLoanAmount = res.balance * 2;
+    try {
+      const pending = await jsonpCall("mydrafts", { idNo: idInput });
+      if (pending && pending.length > 0) {
+        const d = pending[0];
+        showAlert("verifyAlert", "info", `You have a pending <strong>${d.loanType}</strong> loan application awaiting guarantor approval. Redirecting you to its status...`);
+        activeDraftId = d.draftId;
+        setTimeout(() => {
+          document.getElementById("verifySection").style.display = "none";
+          document.getElementById("loanTypeSection").style.display = "none";
+          document.getElementById("progressBar").style.display = "none";
+          document.getElementById("waitingScreen").classList.add("show");
+          startPolling();
+        }, 1200);
+        return;
+      }
+    } catch (e) { /* non-fatal */ }
+    document.getElementById("memberInfo").classList.add("show");
+    document.getElementById("maxLoanDisplay").style.display = "flex";
+    document.getElementById("infoName").textContent = res.name;
+    document.getElementById("infoRegNo").textContent = res.regNo;
+    document.getElementById("infoPhone").textContent = res.phone || "N/A";
+    document.getElementById("infoStatus").textContent = res.status;
+    document.getElementById("infoBalance").textContent = "KES " + Number(res.balance).toLocaleString();
+    document.getElementById("infoLoanBal").textContent = "KES " + Number(res.loanBalance).toLocaleString();
+    document.getElementById("infoMaxLoan").textContent = "Depends on loan type selected";
+    showAlert("verifyAlert","success",`Member verified! Welcome, <strong>${res.name}</strong>. Please select a loan type to see your maximum eligible amount.`);
+    document.getElementById("loanTypeSection").style.display = "block";
+    document.getElementById("loanTypeSection").scrollIntoView({ behavior: "smooth", block: "start" });
+    setProgress(2);
+  } catch(e) { showAlert("verifyAlert","error","Connection error. Please check your internet and try again. " + e.message); }
+  finally { document.getElementById("verifyBtnText").textContent = "🔍 Verify"; document.getElementById("verifySpinner").classList.remove("show"); }
+}
+
+function clearMemberDisplay() { document.getElementById("memberInfo").classList.remove("show"); document.getElementById("maxLoanDisplay").style.display = "none"; memberData = null; maxLoanAmount = 0; }
+
+function selectLoanType(type) {
+  if (!memberData) { showAlert("verifyAlert","error","Please verify your member ID first."); return; }
+  document.querySelectorAll(".loan-type-btn").forEach(b => b.classList.remove("active"));
+  document.querySelectorAll(".form-card").forEach(c => c.classList.remove("show"));
+  document.getElementById("lt-" + type).classList.add("active");
+  selectedLoan = type;
+  fillMemberFields(type);
+  const formEl = document.getElementById("form-" + type);
+  formEl.classList.add("show");
+  setTimeout(() => formEl.scrollIntoView({ behavior: "smooth", block: "start" }), 100);
+  setProgress(3);
+}
+function fillMemberFields(type) {
+  const pfx = { development:"dev_", emergency:"em_", instant:"ins_", item:"it_", backtowork:"bw_" }[type];
+  const m = memberData;
+  setVal(pfx + "name", m.name); setVal(pfx + "regNo", m.regNo); setVal(pfx + "idno", m.idNo);
+  if (document.getElementById(pfx + "phone")) setVal(pfx + "phone", m.phone || "");
+  const cap = LOAN_CAPS[type];
+  maxLoanAmount = (cap !== null && cap !== undefined) ? cap : m.balance * 2;
+  const today = new Date().toISOString().split("T")[0];
+  ["date","ins_date","it_date","bw_date"].forEach(id => { const el = document.getElementById(id); if (el) el.value = today; });
+  const noteEl = document.getElementById(pfx + "maxNote");
+  if (noteEl) noteEl.textContent = `(Max: KES ${Number(maxLoanAmount).toLocaleString()})`;
+}
+function setVal(id, val) { const el = document.getElementById(id); if (el) el.value = val || ""; }
+function checkAmount(inputId, errorId) {
+  const val = parseFloat(document.getElementById(inputId).value);
+  const errEl = document.getElementById(errorId);
+  const fld = document.getElementById(inputId).closest(".field");
+  const cap = LOAN_CAPS[selectedLoan];
+  const capLabel = (cap !== null && cap !== undefined) ? `KES ${Number(maxLoanAmount).toLocaleString()} (fixed maximum for this loan type)` : `KES ${Number(maxLoanAmount).toLocaleString()} (2× your account balance)`;
+  if (val > maxLoanAmount) { errEl.textContent = `Amount exceeds maximum of ${capLabel}.`; fld.classList.add("has-error"); }
+  else { errEl.textContent = ""; fld.classList.remove("has-error"); }
+}
+
+async function submitForm(loanType) {
+  const pfx = { development:"dev_", emergency:"em_", instant:"ins_", item:"it_", backtowork:"bw_" }[loanType];
+  const amount = parseFloat(document.getElementById(pfx + "amount")?.value || 0);
+  if (!amount || amount <= 0) { return alertUser("Please enter a valid Loan Amount."); }
+  if (amount > maxLoanAmount) { const cap = LOAN_CAPS[loanType]; const capLabel = (cap !== null && cap !== undefined) ? `KES ${Number(maxLoanAmount).toLocaleString()} (fixed maximum for this loan type)` : `KES ${Number(maxLoanAmount).toLocaleString()} (2× your account balance)`; return alertUser(`Loan amount exceeds the maximum of ${capLabel}.`); }
+  const declareId = pfx + "declare";
+  if (!document.getElementById(declareId)?.checked) { return alertUser("Please read and accept the declaration before submitting."); }
+  const guarantors = guarantorPickers[loanType]?.selected || [];
+  if (guarantors.length === 0) { return alertUser("At least one guarantor is required."); }
+  if (!confirm(`Confirm submission of your ${loanType.toUpperCase()} loan application for KES ${Number(amount).toLocaleString()}?`)) return;
+  const payload = { loanType, member: memberData, details: gatherAllFields(loanType, pfx) };
+  return sendGuarantorRequests(loanType, payload);
+}
+
+function gatherAllFields(loanType, pfx) {
+  const get = id => document.getElementById(pfx + id)?.value || "";
+  const base = { name: get("name"), regNo: get("regNo"), idNo: get("idno"), phone: get("phone"), income: get("income"), email: get("email"), amount: get("amount"), months: get("months"), installment: get("installment"), commenceDate: get("commenceDate") };
+  if (loanType === "development" || loanType === "emergency") {
+    base.address = get("address"); base.position = get("position"); base.amountWords = get("amountWords");
+    base.purposes = [{ desc: get("p1d"), amt: get("p1a") }, { desc: get("p2d"), amt: get("p2a") }, { desc: get("p3d"), amt: get("p3a") }].filter(p => p.desc);
+    base.security = [get("sec1"), get("sec2"), get("sec3"), get("sec4")].filter(s => s);
+    base.witnessName = get("witnessName"); base.witnessIdNo = get("witnessIdNo"); base.witnessTel = get("witnessTel"); base.witnessAddr = get("witnessAddr");
+  }
+  if (loanType === "item") { base.item = get("item"); base.rate = get("rate"); base.date = get("date"); }
+  if (loanType === "backtowork") { base.interest = get("interest"); base.date = get("date"); }
+  if (loanType === "instant") { base.date = get("date"); }
+  return base;
+}
+function setSubmitting(loanType, state) {
+  const map = { development:"dev", emergency:"em", instant:"ins", item:"it", backtowork:"bw" };
+  const p = map[loanType];
+  const btn = document.getElementById(p + "SubmitBtn"); const sp = document.getElementById(p + "Spinner");
+  if (btn) btn.disabled = state; if (sp) sp.classList.toggle("show", state);
+}
+function alertUser(msg) { alert("⚠️ " + msg); }
+
+function resetAll() {
+  if (pollTimer) clearInterval(pollTimer);
+  if (activeDraftId) { jsonpCall("canceldraft", { id: activeDraftId, idNo: memberData ? memberData.idNo : "" }).catch(() => {}); }
+  window.history.replaceState({}, "", "loan.html");
+  activeDraftId = null;
+  document.getElementById("waitingScreen").classList.remove("show");
+  document.getElementById("finalSubmitBtn").disabled = true;
+  document.getElementById("finalSubmitBtn").style.display = "";
+  document.getElementById("finalSubmitBtn").textContent = "Submit Application";
+  document.getElementById("declinedMsg")?.remove();
+  Object.keys(guarantorPickers).forEach(t => guarantorPickers[t].selected = []);
+  document.querySelectorAll(".g-picker .g-chips").forEach(el => el.innerHTML = "");
+  document.querySelectorAll(".g-picker .gc-count").forEach(el => el.textContent = "0");
+  memberData = null; maxLoanAmount = 0; selectedLoan = null;
+  document.getElementById("nationalId").value = "";
+  document.getElementById("memberInfo").classList.remove("show");
+  document.getElementById("maxLoanDisplay").style.display = "none";
+  hideAlert("verifyAlert");
+  document.getElementById("loanTypeSection").style.display = "none";
+  document.querySelectorAll(".loan-type-btn").forEach(b => b.classList.remove("active"));
+  document.querySelectorAll(".form-card").forEach(c => c.classList.remove("show"));
+  document.getElementById("successScreen").classList.remove("show");
+  document.getElementById("verifySection").style.display = "block";
+  document.getElementById("progressBar").style.display = "flex";
+  setProgress(1);
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+setProgress(1);
+document.querySelectorAll('input[type=date]').forEach(el => { if (!el.value) el.value = new Date().toISOString().split("T")[0]; });
+
+window.addEventListener("DOMContentLoaded", async () => {
+  const draftParam = new URLSearchParams(window.location.search).get("draft");
+  if (draftParam) {
+    activeDraftId = draftParam;
+    document.getElementById("verifySection").style.display = "none";
+    document.getElementById("progressBar").style.display = "none";
+    document.getElementById("waitingScreen").classList.add("show");
+    startPolling();
+  }
+});
+</script>
+</body>
+</html>

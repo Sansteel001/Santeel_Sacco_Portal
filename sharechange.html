@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SANSTEEL SACCO – Share Change</title>
+  <meta name="theme-color" content="#0d1f3c"/>
+  <link rel="manifest" href="manifest.json"/>
+  <link rel="icon" href="icons/icon-192.png"/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root { --navy:#0d1f3c; --navy2:#162d54; --gold:#c9a84c; --gold2:#e8c96a; --cream:#faf8f3; --white:#ffffff; --text:#1a2236; --muted:#6b7a95; --border:#e4e8f0; --success-bg:#e8f7ef; --success:#1a7a4a; --err-bg:#fdecea; --err:#b91c1c; --info-bg:#eaf2fd; --info:#1a5fa6; }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--text); padding: 30px 20px; min-height: 100vh; display: flex; justify-content: center; align-items: flex-start; }
+    .container { max-width: 820px; width: 100%; background: var(--white); border-radius: 18px; box-shadow: 0 8px 40px rgba(13,31,60,.12); padding: 40px 44px 48px; margin: 0 auto; }
+    .form-header { display: flex; align-items: center; gap: 18px; border-bottom: 2px solid var(--border); padding-bottom: 22px; margin-bottom: 30px; }
+    .logo-placeholder { width: 60px; height: 60px; border-radius: 10px; overflow: hidden; flex-shrink: 0; }
+    .logo-placeholder img { width: 100%; height: 100%; object-fit: contain; }
+    .header-text h1 { font-family: 'Playfair Display', serif; font-size: 20px; color: var(--navy); letter-spacing: .02em; }
+    .header-text p { font-size: 13px; color: var(--muted); margin-top: 2px; }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 24px; }
+    .full-width { grid-column: 1 / -1; }
+    label { display: block; font-size: 11.5px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 6px; }
+    label .required { color: var(--err); margin-left: 2px; }
+    input, select { width: 100%; padding: 11px 14px; border: 1.5px solid var(--border); border-radius: 9px; font-size: 14px; font-family: 'DM Sans', sans-serif; transition: .2s; color: var(--text); background: #fafbfc; }
+    input:focus, select:focus { outline: none; border-color: var(--navy); box-shadow: 0 0 0 3px rgba(13,31,60,.08); background: #fff; }
+    input:disabled { background: #f0f0f0; color: #888; cursor: not-allowed; }
+    input.editable { background: #fff; border-color: var(--gold); }
+    input.editable:focus { border-color: var(--navy); }
+    .section-title { font-family: 'Playfair Display', serif; font-size: 16px; color: var(--navy); margin: 24px 0 16px; padding-top: 16px; border-top: 1px solid var(--border); }
+    .section-title:first-of-type { border-top: none; margin-top: 0; padding-top: 0; }
+    .member-info-box { background: var(--cream); border-radius: 10px; padding: 18px 22px; margin-bottom: 20px; border-left: 4px solid var(--gold); }
+    .member-info-box p { font-size: 14px; color: var(--text); margin: 3px 0; }
+    .member-info-box strong { color: var(--navy); }
+    .member-info-box .label { color: var(--muted); font-weight: 400; font-size: 12.5px; text-transform: uppercase; letter-spacing: .04em; }
+    .inline-group { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .inline-group label { margin-bottom: 0; white-space: nowrap; }
+    .inline-group input { flex: 1; min-width: 120px; }
+    .btn-row { display: flex; gap: 12px; margin-top: 28px; flex-wrap: wrap; }
+    .btn { padding: 13px 32px; border: none; border-radius: 9px; font-size: 14px; font-weight: 700; font-family: 'DM Sans', sans-serif; cursor: pointer; transition: .25s; letter-spacing: .02em; flex: 1; min-width: 140px; }
+    .btn-primary { background: var(--navy); color: var(--white); }
+    .btn-primary:hover { background: var(--navy2); }
+    .btn-primary:disabled { background: #aaa; cursor: not-allowed; }
+    .btn-secondary { background: var(--cream); color: var(--text); border: 1.5px solid var(--border); }
+    .btn-secondary:hover { background: #e8eaf0; }
+    .msg-error { background: var(--err-bg); border: 1px solid #fca5a5; color: var(--err); border-radius: 8px; padding: 11px 16px; font-size: 13px; margin: 8px 0 12px; display: none; }
+    .msg-success { background: var(--success-bg); border: 1px solid #a3d8b7; color: var(--success); border-radius: 8px; padding: 16px 20px; font-size: 14px; margin: 12px 0; display: none; }
+    .msg-success strong { display: block; font-size: 16px; }
+    .spinner { display: inline-block; width: 18px; height: 18px; border: 2.5px solid rgba(255,255,255,.3); border-top-color: #fff; border-radius: 50%; animation: spin .6s linear infinite; vertical-align: middle; margin-right: 8px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .back-link { display: block; text-align: center; margin-top: 20px; color: var(--navy); font-weight: 600; text-decoration: none; font-size: 13px; }
+    .back-link:hover { text-decoration: underline; }
+    .hint { font-size: 11px; color: var(--muted); margin-top: 4px; font-style: italic; }
+    @media(max-width:640px){ .container { padding: 24px 18px; } .form-grid { grid-template-columns: 1fr; } .form-header { flex-direction: column; text-align: center; } .header-text h1 { font-size: 17px; } .inline-group { flex-direction: column; align-items: stretch; } .btn-row { flex-direction: column; } .btn { min-width: auto; } }
+  </style>
+</head>
+<body>
+<div class="container" id="app">
+  <div class="form-header">
+    <div class="logo-placeholder"><img src="assets/logo.png" alt="Sansteel Sacco Logo"/></div>
+    <div class="header-text"><h1>SANSTEEL SACCO LIMITED</h1><p>Share Change Application Form</p></div>
+  </div>
+
+  <div id="verifySection">
+    <label for="verifyId">Enter Your National ID to Begin</label>
+    <div class="inline-group">
+      <input id="verifyId" type="text" placeholder="e.g. 25342410" autofocus/>
+      <button class="btn btn-primary" id="verifyBtn" onclick="verifyMember()" style="flex:0 0 auto;min-width:120px;">Verify</button>
+    </div>
+    <div class="msg-error" id="verifyErr">Member not found. Please check your ID and try again.</div>
+  </div>
+
+  <div id="memberInfo" style="display:none;">
+    <div class="member-info-box">
+      <p><span class="label">Name</span> <strong id="mName">—</strong></p>
+      <p><span class="label">Reg No.</span> <strong id="mRegNo">—</strong> &nbsp;|&nbsp; <span class="label">ID</span> <strong id="mId">—</strong></p>
+      <p><span class="label">Phone</span> <strong id="mPhone">—</strong> &nbsp;|&nbsp; <span class="label">Status</span> <strong id="mStatus">—</strong></p>
+    </div>
+  </div>
+
+  <form id="shareForm" style="display:none;" onsubmit="return false;">
+    <div class="section-title">👤 Member Details</div>
+    <div class="form-grid">
+      <div class="full-width"><label for="fullName">Full Name</label><input id="fullName" type="text" placeholder="Full name"/></div>
+      <div><label for="homeAddress">Home Address</label><input id="homeAddress" type="text" placeholder="Home address"/></div>
+      <div><label for="tel">Telephone</label><input id="tel" type="text" placeholder="Phone number"/></div>
+      <div class="full-width"><label for="presentAddress">Present Address</label><input id="presentAddress" type="text" placeholder="Present address"/></div>
+      <div><label for="idNumber">ID Number</label><input id="idNumber" type="text" placeholder="National ID" disabled/></div>
+      <div><label for="dob">Date of Birth</label><input id="dob" type="date"/></div>
+      <div><label for="employer">Employer</label><input id="employer" type="text" placeholder="Employer name"/></div>
+      <div><label for="designation">Designation</label><input id="designation" type="text" placeholder="Job title"/></div>
+      <div><label for="membershipNo">Membership Number</label><input id="membershipNo" type="text" placeholder="Membership number" disabled/></div>
+    </div>
+
+    <div class="section-title">📊 Share Capital Change</div>
+    <div class="form-grid">
+      <div><label for="fromAmount">Current Monthly Deduction (KES) <span class="required">*</span></label><input id="fromAmount" type="number" step="0.01" placeholder="0.00" class="editable"/><div class="hint">Enter your current monthly share deduction amount.</div></div>
+      <div><label for="toAmount">New Monthly Deduction (KES) <span class="required">*</span></label><input id="toAmount" type="number" step="0.01" placeholder="e.g. 2000" required/><div class="hint">Enter the new amount you want to be deducted each month.</div></div>
+      <div><label for="repaymentPeriod">Repayment Period (Months)</label><input id="repaymentPeriod" type="number" placeholder="e.g. 12"/></div>
+      <div><label for="fromDate">From Date</label><input id="fromDate" type="date"/></div>
+      <div><label for="toDate">To Date</label><input id="toDate" type="date"/></div>
+      <div><label for="loanNumber">Loan Number (if applicable)</label><input id="loanNumber" type="text" placeholder="Enter loan number"/></div>
+    </div>
+
+    <div class="section-title">📝 Declaration &amp; Witness</div>
+    <p style="font-size:14px;color:var(--muted);margin-bottom:16px;line-height:1.6;">I hereby authorize Sansteel Savings &amp; Credit Co-operative Society to change my shares deduction from <strong id="declCurrent">—</strong> each month to <strong id="declNew">—</strong> each month. I declare the foregoing particulars are true to the best of my knowledge.</p>
+
+    <div class="form-grid">
+      <div class="full-width"><label for="applicantSignature">Applicant Signature (Full Name) <span class="required">*</span></label><input id="applicantSignature" type="text" placeholder="Type your full name as signature"/></div>
+      <div><label for="applicantDate">Date</label><input id="applicantDate" type="date"/></div>
+      <div class="full-width"><label for="witnessName">Witness Name</label><input id="witnessName" type="text" placeholder="Full name of witness"/></div>
+      <div><label for="witnessMembershipNo">Witness ID No.</label><input id="witnessMembershipNo" type="text" placeholder="National ID number"/></div>
+      <div><label for="witnessDate">Witness Date</label><input id="witnessDate" type="date"/></div>
+    </div>
+
+    <div class="msg-error" id="formErr">Please fill in all required fields.</div>
+    <div class="msg-success" id="formSuccess"><strong>✅ Share Change Request Submitted!</strong><span id="successMsg">Your application has been recorded. Reference ID: <strong id="refId">—</strong></span></div>
+
+    <div class="btn-row">
+      <button class="btn btn-secondary" type="button" onclick="resetForm()">↻ Reset</button>
+      <button class="btn btn-primary" type="button" id="submitBtn" onclick="submitShareChange()">📤 Submit Request</button>
+    </div>
+
+    <a href="viewsharechange.html" class="back-link">📄 View all Share Change Requests →</a>
+  </form>
+</div>
+
+<script src="config.js"></script>
+<script src="app.js"></script>
+<script>
+  let verifiedMember = null;
+
+  function verifyMember() {
+    const id = document.getElementById('verifyId').value.trim();
+    if (!id) { showError('verifyErr', 'Please enter your National ID.'); return; }
+    const btn = document.getElementById('verifyBtn'); btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Verifying...'; hideError('verifyErr');
+    jsonpCall("verify", { idNo: id })
+      .then(function(member) {
+        btn.disabled = false; btn.textContent = 'Verify';
+        if (!member || !member.found) { showError('verifyErr', 'Member not found. Please check your National ID.'); document.getElementById('memberInfo').style.display = 'none'; document.getElementById('shareForm').style.display = 'none'; return; }
+        verifiedMember = member;
+        displayMemberInfo(member);
+        document.getElementById('shareForm').style.display = 'block';
+        document.getElementById('verifySection').querySelector('.inline-group').style.display = 'none';
+        document.getElementById('verifyErr').style.display = 'none';
+        prepopulateForm(member);
+      })
+      .catch(function(e) { btn.disabled = false; btn.textContent = 'Verify'; showError('verifyErr', 'Error: ' + e.message); });
+  }
+
+  function displayMemberInfo(m) {
+    document.getElementById('mName').textContent = m.name || '—';
+    document.getElementById('mRegNo').textContent = m.regNo || '—';
+    document.getElementById('mId').textContent = m.idNo || '—';
+    document.getElementById('mPhone').textContent = m.phone || '—';
+    document.getElementById('mStatus').textContent = m.status || 'Active';
+    document.getElementById('memberInfo').style.display = 'block';
+    document.getElementById('fullName').value = m.name || '';
+    document.getElementById('idNumber').value = m.idNo || '';
+    document.getElementById('membershipNo').value = m.regNo || '';
+    document.getElementById('tel').value = m.phone || '';
+  }
+
+  function prepopulateForm(m) {
+    const currentShare = m.currentShare || 0;
+    document.getElementById('fromAmount').value = currentShare ? Number(currentShare).toFixed(2) : '';
+    document.getElementById('declCurrent').textContent = currentShare ? 'KES ' + Number(currentShare).toFixed(2) : '—';
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('applicantDate').value = today;
+    document.getElementById('witnessDate').value = today;
+    document.getElementById('fromDate').value = today;
+    const toDate = new Date(); toDate.setMonth(toDate.getMonth() + 12);
+    document.getElementById('toDate').value = toDate.toISOString().split('T')[0];
+    document.getElementById('fromAmount').addEventListener('input', function() { document.getElementById('declCurrent').textContent = this.value ? 'KES ' + parseFloat(this.value).toFixed(2) : '—'; });
+    document.getElementById('toAmount').addEventListener('input', function() { document.getElementById('declNew').textContent = this.value ? 'KES ' + parseFloat(this.value).toFixed(2) : '—'; });
+  }
+
+  function submitShareChange() {
+    hideError('formErr'); hideSuccess();
+    if (!verifiedMember) { showError('formErr', 'Please verify your membership first.'); return; }
+    const fromAmount = document.getElementById('fromAmount').value.trim();
+    if (!fromAmount || parseFloat(fromAmount) < 0) { showError('formErr', 'Please enter your current monthly deduction amount.'); return; }
+    const toAmount = document.getElementById('toAmount').value.trim();
+    if (!toAmount || parseFloat(toAmount) <= 0) { showError('formErr', 'Please enter a valid new share deduction amount.'); return; }
+    const signature = document.getElementById('applicantSignature').value.trim();
+    if (!signature) { showError('formErr', 'Please enter your signature (full name).'); return; }
+    const data = {
+      fullName: document.getElementById('fullName').value.trim() || verifiedMember.name || '',
+      homeAddress: document.getElementById('homeAddress').value.trim() || '',
+      tel: document.getElementById('tel').value.trim() || verifiedMember.phone || '',
+      presentAddress: document.getElementById('presentAddress').value.trim() || '',
+      idNumber: document.getElementById('idNumber').value.trim() || verifiedMember.idNo || '',
+      dateOfBirth: document.getElementById('dob').value || '',
+      employer: document.getElementById('employer').value.trim() || '',
+      designation: document.getElementById('designation').value.trim() || '',
+      membershipNo: document.getElementById('membershipNo').value.trim() || verifiedMember.regNo || '',
+      fromAmount: fromAmount || '0',
+      toAmount: toAmount,
+      repaymentPeriod: document.getElementById('repaymentPeriod').value || '',
+      fromDate: document.getElementById('fromDate').value || '',
+      toDate: document.getElementById('toDate').value || '',
+      loanNumber: document.getElementById('loanNumber').value.trim() || '',
+      witnessName: document.getElementById('witnessName').value.trim() || '',
+      witnessMembershipNo: document.getElementById('witnessMembershipNo').value.trim() || '',
+      witnessDate: document.getElementById('witnessDate').value || '',
+      applicantSignature: signature,
+      applicantDate: document.getElementById('applicantDate').value || new Date().toISOString().split('T')[0]
+    };
+    const btn = document.getElementById('submitBtn'); btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Submitting...';
+    jsonpCall("submitsharechange", { data: JSON.stringify(data) })
+      .then(function(result) {
+        btn.disabled = false; btn.textContent = '📤 Submit Request';
+        if (result && result.success) {
+          document.getElementById('refId').textContent = result.scId || '—';
+          document.getElementById('successMsg').innerHTML = 'Your application has been recorded. Reference ID: <strong>' + (result.scId || '—') + '</strong><br><span style="font-size:13px;font-weight:400;">' + (result.viewLink ? '📄 <a href="viewsharechange.html?id=' + encodeURIComponent(result.scId) + '" target="_blank" style="color:var(--success);">View your submission</a>' : '') + '</span>';
+          showSuccess();
+          document.getElementById('toAmount').value = '';
+          document.getElementById('repaymentPeriod').value = '';
+          document.getElementById('loanNumber').value = '';
+          document.getElementById('applicantSignature').value = '';
+          document.getElementById('witnessName').value = '';
+          document.getElementById('witnessMembershipNo').value = '';
+          document.getElementById('declNew').textContent = '—';
+        } else {
+          showError('formErr', result && result.error ? result.error : 'Submission failed. Please try again.');
+        }
+      })
+      .catch(function(e) { btn.disabled = false; btn.textContent = '📤 Submit Request'; showError('formErr', 'Error: ' + e.message); });
+  }
+
+  function resetForm() { if (verifiedMember) { prepopulateForm(verifiedMember); } document.getElementById('toAmount').value = ''; document.getElementById('repaymentPeriod').value = ''; document.getElementById('loanNumber').value = ''; document.getElementById('applicantSignature').value = ''; document.getElementById('witnessName').value = ''; document.getElementById('witnessMembershipNo').value = ''; document.getElementById('applicantDate').value = new Date().toISOString().split('T')[0]; document.getElementById('witnessDate').value = new Date().toISOString().split('T')[0]; document.getElementById('declNew').textContent = '—'; hideError('formErr'); hideSuccess(); document.getElementById('shareForm').scrollIntoView({ behavior: 'smooth' }); }
+  function showError(id, msg) { const el = document.getElementById(id); el.textContent = msg; el.style.display = 'block'; }
+  function hideError(id) { document.getElementById(id).style.display = 'none'; }
+  function showSuccess() { document.getElementById('formSuccess').style.display = 'block'; }
+  function hideSuccess() { document.getElementById('formSuccess').style.display = 'none'; }
+  document.getElementById('verifyId').addEventListener('keypress', function(e) { if (e.key === 'Enter') verifyMember(); });
+</script>
+</body>
+</html>

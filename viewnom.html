@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SANSTEEL SACCO – Nomination Record</title>
+  <meta name="theme-color" content="#0d1f3c"/>
+  <link rel="manifest" href="manifest.json"/>
+  <link rel="icon" href="icons/icon-192.png"/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root{--navy:#0d1f3c;--gold:#c9a84c;--gold2:#e8c96a;--cream:#faf8f3;--white:#fff;--text:#1a2236;--muted:#6b7a95;--border:#e4e8f0}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:"DM Sans",sans-serif;background:var(--cream);color:var(--text)}
+    .site-header{background:var(--navy);padding:0 28px;display:flex;align-items:center;justify-content:space-between;min-height:64px;box-shadow:0 2px 16px rgba(0,0,0,.3)}
+    .header-text h1{font-family:"Playfair Display",serif;font-size:16px;color:var(--gold)}
+    .header-text p{font-size:11px;color:rgba(255,255,255,.5);letter-spacing:.06em;text-transform:uppercase}
+    .print-btn{background:linear-gradient(135deg,var(--gold),var(--gold2));color:var(--navy);border:none;padding:9px 20px;border-radius:7px;font-size:13px;font-weight:700;cursor:pointer;font-family:"DM Sans",sans-serif}
+    .wrap{max-width:760px;margin:32px auto;padding:0 20px 60px}
+    .card{background:var(--white);border-radius:14px;padding:32px;margin-bottom:20px;border:1px solid var(--border);box-shadow:0 2px 12px rgba(13,31,60,.06)}
+    .doc-header{text-align:center;border-bottom:2px solid var(--gold);padding-bottom:20px;margin-bottom:24px}
+    .doc-header .society{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+    .doc-header h2{font-family:"Playfair Display",serif;font-size:22px;color:var(--navy);margin-bottom:4px}
+    .doc-header .act{font-size:12.5px;color:var(--muted)}
+    .nom-id-badge{display:inline-block;background:#eef1f8;padding:6px 18px;border-radius:7px;font-size:14px;font-weight:700;color:var(--navy);margin:10px 0}
+    .status-badge{display:inline-block;padding:4px 14px;border-radius:20px;font-size:12px;font-weight:700;background:#e8f7ef;color:#1a7a4a;border:1px solid #86efac;margin-left:10px}
+    .info-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
+    .info-item .lbl{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px}
+    .info-item .val{font-size:14px;color:var(--text);font-weight:500}
+    .section-heading{font-family:"Playfair Display",serif;font-size:15px;color:var(--navy);margin:20px 0 12px;border-left:3px solid var(--gold);padding-left:10px}
+    table{width:100%;border-collapse:collapse;font-size:13.5px}
+    th{background:var(--navy);color:#fff;padding:10px 14px;text-align:left;font-size:12px;font-weight:600;letter-spacing:.03em}
+    td{padding:10px 14px;border-bottom:1px solid var(--border)}
+    tr:last-child td{border-bottom:none}
+    tr:nth-child(even) td{background:#f8f9fb}
+    .empty-row td{color:var(--muted);font-style:italic}
+    .sig-row{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:32px}
+    .sig-box{border-top:1.5px solid var(--navy);padding-top:8px}
+    .sig-box .lbl{font-size:11.5px;color:var(--muted)}
+    .notice{background:#fff8e6;border:1px solid #fcd34d;border-radius:8px;padding:12px 16px;font-size:12.5px;color:#92400e;margin-top:16px;line-height:1.6}
+    .loading{text-align:center;padding:60px;color:var(--muted)}
+    .error{text-align:center;padding:60px;color:#b91c1c}
+    @media print{.site-header,.print-btn{display:none !important}.card{box-shadow:none;border:1px solid #ddd}.wrap{margin:0;padding:0}}
+  </style>
+</head>
+<body>
+<div class="site-header">
+  <div class="header-text"><h1>SANSTEEL SACCO LIMITED</h1><p>Nomination Form &mdash; View Record</p></div>
+  <button class="print-btn" onclick="window.print()">&#128438; Print / Save PDF</button>
+</div>
+<div class="wrap" id="wrap"><div class="loading">Loading nomination record&hellip;</div></div>
+<script src="config.js"></script>
+<script src="app.js"></script>
+<script>
+  var nomId = getUrlParam("id");
+  function esc(s){if(!s)return"";return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+  function renderRecord(r){
+    if(!r||!r.data){document.getElementById("wrap").innerHTML='<div class="error">Nomination record not found.</div>';return;}
+    var d=r.data;
+    var nominees=[
+      {name:d.nom1Name,rel:d.nom1Relationship,share:d.nom1Share},
+      {name:d.nom2Name,rel:d.nom2Relationship,share:d.nom2Share},
+      {name:d.nom3Name,rel:d.nom3Relationship,share:d.nom3Share},
+      {name:d.nom4Name,rel:d.nom4Relationship,share:d.nom4Share}
+    ];
+    var nomRows="";
+    nominees.forEach(function(n,i){
+      if(n.name){nomRows+='<tr><td>'+(i+1)+'</td><td>'+esc(n.name)+'</td><td>'+esc(n.rel)+'</td><td>'+(n.share?n.share+"%":"&mdash;")+'</td></tr>';}
+      else{nomRows+='<tr class="empty-row"><td>'+(i+1)+'</td><td colspan="3">Not filled</td></tr>';}
+    });
+    var html='<div class="card">'+
+      '<div class="doc-header">'+
+        '<div class="society">The Co-operative Societies Act &mdash; Form VII</div>'+
+        '<h2>NOMINATION FORM</h2>'+
+        '<div class="act">SANSTEEL SAVINGS &amp; CREDIT CO-OPERATIVE SOCIETY LIMITED</div>'+
+        '<div style="margin-top:12px"><div class="nom-id-badge">'+esc(r.nomId)+'</div><span class="status-badge">Submitted</span></div>'+
+        '<div style="font-size:12px;color:var(--muted);margin-top:8px">Submitted: '+esc(r.submissionDate)+'</div>'+
+      '</div>'+
+      '<div class="section-heading">Member Details</div>'+
+      '<div class="info-row">'+
+        '<div class="info-item"><div class="lbl">Full Name</div><div class="val">'+esc(d.memberName)+'</div></div>'+
+        '<div class="info-item"><div class="lbl">National ID No.</div><div class="val">'+esc(d.nationalId)+'</div></div>'+
+      '</div>'+
+      '<div class="info-row">'+
+        '<div class="info-item"><div class="lbl">Membership No.</div><div class="val">'+esc(d.membershipNo||"&mdash;")+'</div></div>'+
+        '<div class="info-item"><div class="lbl">P.O. Box</div><div class="val">'+esc(d.poBox||"&mdash;")+'</div></div>'+
+      '</div>'+
+      '<p style="font-size:13.5px;line-height:1.75;margin:20px 0;color:#3a4560">'+
+        'Being Member No. <strong>'+esc(d.membershipNo||"____________")+'</strong>, '+
+        'I hereby nominate the following nominee(s) to inherit my shares or interest in SANSTEEL SACCO LIMITED in the following manner:'+
+      '</p>'+
+      '<div class="section-heading">Nominees</div>'+
+      '<table><thead><tr><th>#</th><th>Name of Nominee</th><th>Relationship</th><th>% of Share/Interest</th></tr></thead><tbody>'+nomRows+'</tbody></table>'+
+      '<div class="section-heading">Witnessed By</div>'+
+      '<table><thead><tr><th>Witness</th><th>Full Name</th><th>ID No.</th><th>Address</th></tr></thead>'+
+      '<tbody>'+
+        '<tr><td>1</td><td>'+esc(d.wit1Name||"&mdash;")+'</td><td>'+esc(d.wit1IdNo||"&mdash;")+'</td><td>'+esc(d.wit1Address||"&mdash;")+'</td></tr>'+
+        '<tr><td>2</td><td>'+esc(d.wit2Name||"&mdash;")+'</td><td>'+esc(d.wit2IdNo||"&mdash;")+'</td><td>'+esc(d.wit2Address||"&mdash;")+'</td></tr>'+
+      '</tbody></table>'+
+      '<div style="font-size:13px;margin:28px 0 16px">Given under my hand this <strong>'+esc(d.dateSigned||"____________")+'</strong></div>'+
+      '<div class="sig-row">'+
+        '<div class="sig-box"><div class="lbl">Member Signature &amp; Date</div></div>'+
+        '<div class="sig-box"><div class="lbl">Authorized Officer Signature &amp; Date</div></div>'+
+      '</div>'+
+      '<div class="notice">&#9432; This is a digital record submitted on '+esc(r.submissionDate)+'. A physical signed copy must also be submitted to the SACCO office to complete the process.</div>'+
+    '</div>';
+    document.getElementById("wrap").innerHTML=html;
+  }
+  if (!nomId) {
+    document.getElementById("wrap").innerHTML='<div class="error">No nomination ID provided.</div>';
+  } else {
+    jsonpCall("getnom", { id: nomId })
+      .then(renderRecord)
+      .catch(function(e){ document.getElementById("wrap").innerHTML='<div class="error">Error: '+e.message+'</div>'; });
+  }
+</script>
+</body>
+</html>

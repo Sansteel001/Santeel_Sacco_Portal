@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SANSTEEL SACCO – Nomination Form</title>
+  <meta name="theme-color" content="#0d1f3c"/>
+  <link rel="manifest" href="manifest.json"/>
+  <link rel="icon" href="icons/icon-192.png"/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root{--navy:#0d1f3c;--navy2:#162d54;--gold:#c9a84c;--gold2:#e8c96a;--cream:#faf8f3;--white:#fff;--text:#1a2236;--muted:#6b7a95;--border:#e4e8f0;--success-bg:#e8f7ef;--success:#1a7a4a;--err-bg:#fdecea;--err:#b91c1c}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html,body{font-family:"DM Sans",sans-serif;background:var(--cream);color:var(--text)}
+    .site-header{background:var(--navy);padding:0 28px;display:flex;align-items:center;gap:14px;min-height:64px;box-shadow:0 2px 16px rgba(0,0,0,.3)}
+    .header-text h1{font-family:"Playfair Display",serif;font-size:16px;color:var(--gold)}
+    .header-text p{font-size:11px;color:rgba(255,255,255,.5);letter-spacing:.06em;text-transform:uppercase}
+    .form-wrap{max-width:780px;margin:36px auto;padding:0 20px 60px}
+    .form-title{font-family:"Playfair Display",serif;font-size:26px;color:var(--navy);margin-bottom:4px}
+    .form-subtitle{font-size:13px;color:var(--muted);margin-bottom:30px}
+    .card{background:var(--white);border-radius:14px;padding:28px;margin-bottom:20px;border:1px solid var(--border);box-shadow:0 2px 12px rgba(13,31,60,.06)}
+    .card h3{font-family:"Playfair Display",serif;font-size:16px;color:var(--navy);margin-bottom:18px;padding-bottom:10px;border-bottom:2px solid var(--gold);display:inline-block}
+    .section-label{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);margin-bottom:14px;margin-top:8px}
+    .field-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+    .field-row.single{grid-template-columns:1fr}
+    .field{display:flex;flex-direction:column;gap:5px}
+    label{font-size:11.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+    input,textarea{width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:9px;font-size:14px;font-family:"DM Sans",sans-serif;color:var(--text);background:var(--white);transition:.2s}
+    input:focus,textarea:focus{outline:none;border-color:var(--navy);box-shadow:0 0 0 3px rgba(13,31,60,.08)}
+    input[readonly]{background:#f4f6fb;color:var(--muted);cursor:not-allowed}
+    textarea{resize:vertical;min-height:70px}
+    .nominee-table{width:100%;border-collapse:collapse}
+    .nominee-table th{background:var(--navy);color:#fff;font-size:12px;font-weight:600;padding:10px 12px;text-align:left;letter-spacing:.03em}
+    .nominee-table th:first-child{border-radius:7px 0 0 0}
+    .nominee-table th:last-child{border-radius:0 7px 0 0}
+    .nominee-table td{padding:8px;border-bottom:1px solid var(--border)}
+    .nominee-table tr:last-child td{border-bottom:none}
+    .nominee-table td input{padding:8px 10px;font-size:13px;border-radius:6px}
+    .row-num{font-size:12px;font-weight:700;color:var(--muted);text-align:center;padding:0 6px !important}
+    .btn-submit{width:100%;padding:14px;background:linear-gradient(135deg,var(--navy),var(--navy2));color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:700;font-family:"DM Sans",sans-serif;cursor:pointer;letter-spacing:.03em;transition:.2s}
+    .btn-submit:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 6px 20px rgba(13,31,60,.3)}
+    .btn-submit:disabled{background:#aaa;cursor:not-allowed}
+    .btn-verify{padding:12px 24px;background:var(--navy);color:#fff;border:none;border-radius:9px;font-size:14px;font-weight:700;font-family:"DM Sans",sans-serif;cursor:pointer;margin-top:4px;transition:.2s}
+    .btn-verify:hover:not(:disabled){background:var(--navy2)}
+    .btn-verify:disabled{background:#aaa;cursor:not-allowed}
+    .msg{border-radius:8px;padding:12px 16px;font-size:13px;margin-bottom:16px;display:none}
+    .msg.err{background:var(--err-bg);border:1px solid #fca5a5;color:var(--err)}
+    .verified-badge{display:inline-flex;align-items:center;gap:7px;background:var(--success-bg);border:1px solid #86efac;color:var(--success);font-size:12.5px;font-weight:700;padding:6px 14px;border-radius:20px;margin-bottom:18px}
+    .declaration-box{background:#f8f9fb;border:1px solid var(--border);border-radius:9px;padding:16px 18px;font-size:13.5px;color:#3a4560;line-height:1.75;margin-bottom:20px}
+    .checkbox-row{display:flex;align-items:flex-start;gap:10px;margin-bottom:20px}
+    .checkbox-row input[type="checkbox"]{width:18px;height:18px;margin-top:2px;flex-shrink:0;accent-color:var(--navy);cursor:pointer}
+    .checkbox-row label{font-size:13.5px;font-weight:400;color:var(--text);text-transform:none;letter-spacing:0;cursor:pointer}
+    .success-page{text-align:center;padding:48px 24px}
+    .success-icon{font-size:52px;margin-bottom:16px}
+    .success-page h2{font-family:"Playfair Display",serif;font-size:24px;color:var(--navy);margin-bottom:10px}
+    .success-page p{font-size:14px;color:var(--muted);margin-bottom:8px;line-height:1.7}
+    .nom-id{font-size:18px;font-weight:700;color:var(--navy);background:#eef1f8;padding:8px 22px;border-radius:8px;display:inline-block;margin:12px 0}
+    .btn-view{display:inline-block;margin-top:12px;padding:12px 28px;background:linear-gradient(135deg,var(--gold),var(--gold2));color:var(--navy);font-weight:700;font-size:14px;border-radius:9px;text-decoration:none}
+    .divider{border:none;border-top:1px solid var(--border);margin:20px 0}
+    @media(max-width:600px){.field-row{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+<div class="site-header"><div class="header-text"><h1>SANSTEEL SACCO LIMITED</h1><p>Nomination Form &mdash; Form VII (Co-operative Societies Act)</p></div></div>
+
+<div class="form-wrap" id="verifySection">
+  <div class="form-title">Share Nomination Form</div>
+  <div class="form-subtitle">Please verify your membership before filling the form.</div>
+  <div class="card">
+    <h3>Member Verification</h3>
+    <div class="field" style="margin-bottom:16px"><label>National ID Number</label><input id="verifyId" type="text" placeholder="Enter your National ID" autocomplete="off"/></div>
+    <div class="msg err" id="verifyErr">Member not found. Please check your National ID.</div>
+    <button class="btn-verify" id="verifyBtn" onclick="verifyMember()">Verify &amp; Continue</button>
+  </div>
+</div>
+
+<div class="form-wrap" id="mainForm" style="display:none">
+  <div class="form-title">Share Nomination Form</div>
+  <div class="form-subtitle">Form VII &mdash; The Co-operative Societies Act &mdash; SANSTEEL SACCO LIMITED</div>
+
+  <div id="successSection" style="display:none">
+    <div class="card"><div class="success-page">
+      <div class="success-icon">&#9989;</div>
+      <h2>Nomination Submitted!</h2>
+      <p>Your nomination has been recorded successfully.</p>
+      <p>Your Nomination ID:</p>
+      <div class="nom-id" id="successNomId"></div>
+      <p style="margin-top:12px">Use the link below to view or download your nomination form.</p>
+      <a href="#" id="successLink" target="_blank" class="btn-view">View / Download Nomination</a>
+    </div></div>
+  </div>
+
+  <div id="formBody">
+    <div class="card">
+      <h3>Member Details</h3>
+      <div class="verified-badge" id="verifiedBadge">&#10003; Verified</div>
+      <div class="field-row"><div class="field"><label>Full Name</label><input id="memberName" type="text" readonly/></div><div class="field"><label>National ID No.</label><input id="nationalId" type="text" readonly/></div></div>
+      <div class="field-row"><div class="field"><label>Membership No. (Reg. No.)</label><input id="membershipNo" type="text" readonly/></div><div class="field"><label>P.O. Box</label><input id="poBox" type="text" placeholder="e.g. P.O. Box 12345-00200 Nairobi"/></div></div>
+    </div>
+
+    <div class="card">
+      <h3>Nominee(s)</h3>
+      <p style="font-size:13.5px;color:var(--muted);margin-bottom:18px;line-height:1.7">I hereby nominate the following nominee(s) to inherit my shares or interest in SANSTEEL SACCO LIMITED (at least 1 required; total % must equal 100):</p>
+      <div style="overflow-x:auto">
+        <table class="nominee-table">
+          <thead><tr><th style="width:36px">#</th><th>Full Name of Nominee</th><th>Relationship</th><th style="width:130px">% of Share/Interest</th></tr></thead>
+          <tbody>
+            <tr><td class="row-num">1</td><td><input id="nom1Name" type="text" placeholder="Full name"/></td><td><input id="nom1Relationship" type="text" placeholder="e.g. Spouse, Child"/></td><td><input id="nom1Share" type="number" min="0" max="100" step="0.01" placeholder="e.g. 50"/></td></tr>
+            <tr><td class="row-num">2</td><td><input id="nom2Name" type="text" placeholder="Full name (optional)"/></td><td><input id="nom2Relationship" type="text" placeholder="Relationship"/></td><td><input id="nom2Share" type="number" min="0" max="100" step="0.01" placeholder="e.g. 30"/></td></tr>
+            <tr><td class="row-num">3</td><td><input id="nom3Name" type="text" placeholder="Full name (optional)"/></td><td><input id="nom3Relationship" type="text" placeholder="Relationship"/></td><td><input id="nom3Share" type="number" min="0" max="100" step="0.01" placeholder="e.g. 20"/></td></tr>
+            <tr><td class="row-num">4</td><td><input id="nom4Name" type="text" placeholder="Full name (optional)"/></td><td><input id="nom4Relationship" type="text" placeholder="Relationship"/></td><td><input id="nom4Share" type="number" min="0" max="100" step="0.01" placeholder="e.g. 0"/></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="font-size:12px;color:var(--muted);margin-top:10px">Note: All % share values must add up to 100.</p>
+    </div>
+
+    <div class="card">
+      <h3>Witnessed By</h3>
+      <p style="font-size:13.5px;color:var(--muted);margin-bottom:18px;line-height:1.7">This nomination must be witnessed by two (2) persons who are not nominees.</p>
+      <div class="section-label">Witness 1</div>
+      <div class="field-row"><div class="field"><label>Full Name</label><input id="wit1Name" type="text" placeholder="Witness full name"/></div><div class="field"><label>ID No.</label><input id="wit1IdNo" type="text" placeholder="National ID"/></div></div>
+      <div class="field-row single"><div class="field"><label>Address</label><textarea id="wit1Address" placeholder="Physical address of witness"></textarea></div></div>
+      <hr class="divider"/>
+      <div class="section-label">Witness 2</div>
+      <div class="field-row"><div class="field"><label>Full Name</label><input id="wit2Name" type="text" placeholder="Witness full name"/></div><div class="field"><label>ID No.</label><input id="wit2IdNo" type="text" placeholder="National ID"/></div></div>
+      <div class="field-row single"><div class="field"><label>Address</label><textarea id="wit2Address" placeholder="Physical address of witness"></textarea></div></div>
+    </div>
+
+    <div class="card">
+      <h3>Declaration</h3>
+      <div class="field-row" style="max-width:320px"><div class="field"><label>Date Signed</label><input id="dateSigned" type="date"/></div></div>
+      <div class="declaration-box">I, <strong id="declName">____________________</strong>, National ID No. <strong id="declId">____________</strong>, being Member No. <strong id="declMembership">____________</strong> of SANSTEEL SACCO LIMITED, hereby nominate the above-named person(s) to inherit my shares or interest in the said society in the proportions indicated above, and I declare that the foregoing particulars are true to the best of my knowledge.</div>
+      <div class="checkbox-row"><input type="checkbox" id="declConfirm"/><label for="declConfirm">I confirm that the information provided above is correct and I authorize SANSTEEL SACCO LIMITED to record this nomination.</label></div>
+      <div class="msg err" id="submitErr"></div>
+      <button class="btn-submit" id="submitBtn" onclick="submitForm()">Submit Nomination Form</button>
+    </div>
+  </div>
+</div>
+
+<script src="config.js"></script>
+<script src="app.js"></script>
+<script>
+  document.getElementById("dateSigned").valueAsDate = new Date();
+  document.getElementById("verifyId").addEventListener("keypress",function(e){if(e.key==="Enter")verifyMember();});
+
+  function verifyMember(){
+    var id=document.getElementById("verifyId").value.trim();
+    if(!id){showErr("verifyErr","Please enter your National ID.");return;}
+    hideErr("verifyErr");
+    var btn=document.getElementById("verifyBtn"); btn.disabled=true; btn.textContent="Verifying...";
+    jsonpCall("verify", { idNo: id })
+      .then(function(result){
+        btn.disabled=false; btn.textContent="Verify & Continue";
+        if(!result||!result.found){showErr("verifyErr","Member not found. Please check your National ID.");return;}
+        document.getElementById("memberName").value=result.name||"";
+        document.getElementById("nationalId").value=result.idNo||"";
+        document.getElementById("membershipNo").value=result.regNo||"";
+        document.getElementById("verifiedBadge").textContent="\u2713 Verified: "+(result.name||"");
+        document.getElementById("declName").textContent=result.name||"____________________";
+        document.getElementById("declId").textContent=result.idNo||"____________";
+        document.getElementById("declMembership").textContent=result.regNo||"____________";
+        document.getElementById("verifySection").style.display="none";
+        document.getElementById("mainForm").style.display="block";
+        window.scrollTo({top:0,behavior:"smooth"});
+      })
+      .catch(function(err){btn.disabled=false;btn.textContent="Verify & Continue";showErr("verifyErr","Error: "+err.message);});
+  }
+
+  function submitForm(){
+    hideErr("submitErr");
+    if(!document.getElementById("nom1Name").value.trim()){showErr("submitErr","At least one nominee name is required.");return;}
+    if(!document.getElementById("nom1Relationship").value.trim()){showErr("submitErr","Nominee 1 relationship is required.");return;}
+    if(!document.getElementById("nom1Share").value){showErr("submitErr","Nominee 1 % share is required.");return;}
+    var total=0;
+    ["nom1Share","nom2Share","nom3Share","nom4Share"].forEach(function(id){total+=parseFloat(document.getElementById(id).value)||0;});
+    if(Math.abs(total-100)>0.01){showErr("submitErr","Total % share must equal 100. Current total: "+total.toFixed(2)+"%");return;}
+    if(!document.getElementById("wit1Name").value.trim()){showErr("submitErr","Witness 1 full name is required.");return;}
+    if(!document.getElementById("wit1IdNo").value.trim()){showErr("submitErr","Witness 1 ID No. is required.");return;}
+    if(!document.getElementById("wit2Name").value.trim()){showErr("submitErr","Witness 2 full name is required.");return;}
+    if(!document.getElementById("wit2IdNo").value.trim()){showErr("submitErr","Witness 2 ID No. is required.");return;}
+    if(!document.getElementById("declConfirm").checked){showErr("submitErr","Please tick the declaration checkbox to confirm.");return;}
+    var btn=document.getElementById("submitBtn");btn.disabled=true;btn.textContent="Submitting...";
+    var data={
+      memberName:document.getElementById("memberName").value.trim(),
+      nationalId:document.getElementById("nationalId").value.trim(),
+      membershipNo:document.getElementById("membershipNo").value.trim(),
+      poBox:document.getElementById("poBox").value.trim(),
+      nom1Name:document.getElementById("nom1Name").value.trim(),
+      nom1Relationship:document.getElementById("nom1Relationship").value.trim(),
+      nom1Share:document.getElementById("nom1Share").value.trim(),
+      nom2Name:document.getElementById("nom2Name").value.trim(),
+      nom2Relationship:document.getElementById("nom2Relationship").value.trim(),
+      nom2Share:document.getElementById("nom2Share").value.trim(),
+      nom3Name:document.getElementById("nom3Name").value.trim(),
+      nom3Relationship:document.getElementById("nom3Relationship").value.trim(),
+      nom3Share:document.getElementById("nom3Share").value.trim(),
+      nom4Name:document.getElementById("nom4Name").value.trim(),
+      nom4Relationship:document.getElementById("nom4Relationship").value.trim(),
+      nom4Share:document.getElementById("nom4Share").value.trim(),
+      wit1Name:document.getElementById("wit1Name").value.trim(),
+      wit1IdNo:document.getElementById("wit1IdNo").value.trim(),
+      wit1Address:document.getElementById("wit1Address").value.trim(),
+      wit2Name:document.getElementById("wit2Name").value.trim(),
+      wit2IdNo:document.getElementById("wit2IdNo").value.trim(),
+      wit2Address:document.getElementById("wit2Address").value.trim(),
+      dateSigned:document.getElementById("dateSigned").value
+    };
+    jsonpCall("submitnom", { data: JSON.stringify(data) })
+      .then(function(result){
+        btn.disabled=false;btn.textContent="Submit Nomination Form";
+        if(result&&result.success){
+          document.getElementById("successNomId").textContent=result.nomId;
+          document.getElementById("successLink").href="viewnom.html?id="+encodeURIComponent(result.nomId);
+          document.getElementById("formBody").style.display="none";
+          document.getElementById("successSection").style.display="block";
+          window.scrollTo({top:0,behavior:"smooth"});
+        }else{showErr("submitErr","Submission failed. Please try again.");}
+      })
+      .catch(function(err){btn.disabled=false;btn.textContent="Submit Nomination Form";showErr("submitErr","Error: "+err.message);});
+  }
+  function showErr(id,msg){var el=document.getElementById(id);el.textContent=msg;el.style.display="block";}
+  function hideErr(id){document.getElementById(id).style.display="none";}
+</script>
+</body>
+</html>

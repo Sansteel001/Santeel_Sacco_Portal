@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SANSTEEL SACCO - Member Receipts</title>
+  <meta name="theme-color" content="#0d1f3c"/>
+  <link rel="manifest" href="manifest.json"/>
+  <link rel="icon" href="icons/icon-192.png"/>
+  <style>
+    html,body{margin:0;padding:0;overflow-y:auto;background:#f0f2f5;font-family:Arial,sans-serif;}
+    .top-header{background:#0d1f3c;padding:18px 28px;display:flex;align-items:center;gap:16px;}
+    .top-header img{width:56px;height:56px;border-radius:50%;border:2px solid #c9a84c;object-fit:cover;flex-shrink:0;}
+    .top-header h1{margin:0;font-size:17px;color:#c9a84c;}
+    .top-header p{margin:2px 0 0 0;font-size:12px;color:rgba(255,255,255,.6);}
+    .search-card{max-width:540px;margin:28px auto;background:#fff;border-radius:10px;padding:24px;box-shadow:0 2px 10px rgba(0,0,0,.08);}
+    .search-card h3{margin:0 0 16px 0;color:#0d1f3c;font-size:15px;}
+    .search-row{display:flex;gap:10px;}
+    .search-row input{flex:1;padding:11px 14px;border:1px solid #ddd;border-radius:7px;font-size:14px;}
+    .search-row input:focus{outline:none;border-color:#0d1f3c;}
+    .search-row button{padding:11px 22px;background:#0d1f3c;color:#fff;border:none;border-radius:7px;font-size:14px;font-weight:700;cursor:pointer;}
+    .search-row button:hover{background:#1a3a6b;}
+    .search-row button:disabled{background:#aaa;cursor:not-allowed;}
+    .msg-error{background:#fdecea;border:1px solid #f5c6cb;color:#c0392b;border-radius:7px;padding:10px 14px;font-size:13px;margin-top:12px;display:none;}
+    .msg-hint{color:#888;font-size:13px;margin-top:10px;}
+    .member-bar{max-width:900px;margin:0 auto 16px auto;background:#fff;border-radius:10px;padding:14px 20px;box-shadow:0 2px 10px rgba(0,0,0,.08);display:none;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;}
+    .m-name{font-weight:700;font-size:15px;color:#0d1f3c;}
+    .m-meta,.m-count{font-size:13px;color:#666;}
+    .tx-wrap{max-width:900px;margin:0 auto 40px auto;}
+    .tx-card{background:#fff;border-radius:8px;margin-bottom:12px;box-shadow:0 1px 6px rgba(0,0,0,.07);overflow:hidden;}
+    .tx-header{display:flex;align-items:center;justify-content:space-between;padding:13px 16px;border-bottom:1px solid #f0f0f0;flex-wrap:wrap;gap:8px;}
+    .tx-left{display:flex;align-items:center;gap:12px;}
+    .tx-icon{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+    .tx-title{font-weight:700;font-size:14px;color:#0d1f3c;}
+    .tx-sub{font-size:12px;color:#888;margin-top:2px;}
+    .tx-right{display:flex;align-items:center;gap:14px;}
+    .tx-amount{font-weight:700;font-size:15px;color:#0d1f3c;text-align:right;}
+    .tx-amount small{display:block;font-size:11px;color:#888;font-weight:normal;}
+    .btn-rcp{padding:7px 16px;background:#0d1f3c;color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;}
+    .btn-rcp:hover{background:#1a3a6b;}
+    .btn-rcp:disabled{background:#aaa;cursor:not-allowed;}
+    .tx-remarks{padding:8px 16px 10px 68px;font-size:12px;color:#666;background:#fafafa;border-top:1px solid #f0f0f0;}
+    .type-deposit{background:#d4edda;color:#155724;}
+    .type-withdrawal{background:#f8d7da;color:#721c24;}
+    .type-loan{background:#d1ecf1;color:#0c5460;}
+    .type-repayment{background:#fff3cd;color:#856404;}
+    .type-interest{background:#e2d9f3;color:#4a235a;}
+    .type-default{background:#e2e3e5;color:#383d41;}
+    .state-box{text-align:center;padding:50px 20px;color:#999;font-size:14px;}
+    .state-box .icon{font-size:36px;margin-bottom:10px;}
+    #rcpCont{position:fixed;left:-9999px;top:0;width:794px;background:#fff;z-index:-1;}
+    .rcp-wrap{font-family:Arial,sans-serif;font-size:13px;color:#1a1a1a;background:#fff;}
+    .rcp-hdr{background:#0d1f3c;padding:20px 28px;display:flex;align-items:center;gap:16px;}
+    .rcp-hdr img{width:64px;height:64px;border-radius:50%;border:3px solid #c9a84c;object-fit:cover;flex-shrink:0;}
+    .rcp-hdr h1{margin:0 0 4px 0;font-size:17px;color:#c9a84c;}
+    .rcp-hdr p{margin:0;font-size:12px;color:rgba(255,255,255,.65);}
+    .rcp-typebar{padding:10px 28px;display:flex;justify-content:space-between;align-items:center;border-bottom:3px solid #0d1f3c;}
+    .rcp-typebar .rtype{font-size:15px;font-weight:700;color:#0d1f3c;}
+    .rcp-typebar .rno{font-size:12px;color:#888;}
+    .rcp-body{padding:20px 28px;}
+    .rcp-sec{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#0d1f3c;border-bottom:1px solid #e0e0e0;padding-bottom:5px;margin:18px 0 10px 0;}
+    .rcp-grid{display:grid;grid-template-columns:1fr 1fr;gap:0;}
+    .rcp-item{padding:8px 0;border-bottom:1px solid #f0f0f0;}
+    .rcp-item label{font-size:10px;text-transform:uppercase;color:#999;font-weight:700;display:block;margin-bottom:2px;}
+    .rcp-item span{font-size:13px;color:#1a1a1a;font-weight:500;}
+    .rcp-item.full{grid-column:1/-1;}
+    .rcp-amtbox{background:#f8f9fa;border:1px solid #e0e0e0;border-radius:6px;padding:14px 20px;margin:16px 0;display:flex;justify-content:space-between;align-items:center;}
+    .rcp-amtbox .albl{font-size:12px;color:#666;}
+    .rcp-amtbox .aval{font-size:22px;font-weight:700;color:#0d1f3c;}
+    .rcp-sig{display:grid;grid-template-columns:1fr 1fr;gap:32px;margin-top:28px;padding-top:16px;border-top:1px solid #e0e0e0;}
+    .rcp-sig-item label{font-size:11px;color:#888;font-weight:700;text-transform:uppercase;display:block;margin-bottom:30px;}
+    .sig-line{border-bottom:1px solid #333;margin-bottom:5px;}
+    .sig-sub{font-size:10px;color:#aaa;}
+    .rcp-foot{background:#f8f9fa;border-top:1px solid #eee;text-align:center;padding:10px;font-size:10px;color:#aaa;margin-top:16px;}
+    .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:1000;align-items:center;justify-content:center;padding:20px;}
+    .modal-overlay.open{display:flex;}
+    .modal-box{background:#fff;border-radius:10px;width:100%;max-width:820px;max-height:90vh;display:flex;flex-direction:column;box-shadow:0 8px 40px rgba(0,0,0,.3);}
+    .modal-topbar{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;border-bottom:1px solid #e0e0e0;flex-shrink:0;}
+    .modal-topbar span{font-weight:700;font-size:14px;color:#0d1f3c;}
+    .modal-actions{display:flex;gap:10px;align-items:center;}
+    .btn-print-now{padding:8px 20px;background:#0d1f3c;color:#fff;border:none;border-radius:6px;font-size:13px;font-weight:700;cursor:pointer;}
+    .btn-print-now:hover{background:#1a3a6b;}
+    .btn-close-modal{padding:8px 16px;background:#f1f3f4;color:#333;border:none;border-radius:6px;font-size:13px;font-weight:700;cursor:pointer;}
+    .btn-close-modal:hover{background:#e0e0e0;}
+    .modal-preview{flex:1;overflow-y:auto;padding:20px;background:#e8eaed;}
+    .modal-preview .rcp-wrap{max-width:760px;margin:0 auto;box-shadow:0 2px 12px rgba(0,0,0,.15);}
+    @media print{ body{background:#fff;} .top-header,.search-card,.member-bar,.tx-wrap{display:none!important;} #rcpCont{position:static;left:0;width:100%;z-index:1;} }
+  </style>
+</head>
+<body>
+
+<div class="top-header">
+  <img src="assets/logo.png" alt="SANSTEEL SACCO"/>
+  <div><h1>SANSTEEL SACCO LIMITED</h1><p>Member Transaction Receipts</p></div>
+</div>
+
+<div class="search-card">
+  <h3>&#x1F50D; Look Up Member Transactions</h3>
+  <div class="search-row">
+    <input id="searchId" type="text" placeholder="Enter National ID Number" autocomplete="off"/>
+    <button id="searchBtn" onclick="loadTransactions()">Search</button>
+  </div>
+  <div class="msg-error" id="searchErr"></div>
+  <p class="msg-hint">Enter a National ID to view and print all transaction receipts.</p>
+</div>
+
+<div class="member-bar" id="memberBar">
+  <div><div class="m-name" id="mName"></div><div class="m-meta" id="mMeta"></div></div>
+  <div class="m-count" id="mCount"></div>
+</div>
+
+<div class="tx-wrap">
+  <div id="txList"><div class="state-box"><div class="icon">&#x1F9FE;</div><div>Enter a National ID above to load transactions.</div></div></div>
+</div>
+
+<div id="rcpCont"></div>
+
+<script src="config.js"></script>
+<script src="app.js"></script>
+<script>
+var BASE_URL = window.APPS_SCRIPT_URL;
+var LOGO_SRC = "assets/logo.png";
+var allData = null;
+var PRESET_ID = getUrlParam("id");
+
+window.onload = function() {
+  document.getElementById('searchId').addEventListener('keypress', function(e) { if (e.key === 'Enter') loadTransactions(); });
+  if (PRESET_ID) { document.getElementById('searchId').value = PRESET_ID; loadTransactions(); }
+};
+
+function typeStyle(type) {
+  var t = (type || '').toLowerCase();
+  if (t.indexOf('deposit') >= 0 || t.indexOf('share') >= 0 || t.indexOf('saving') >= 0) return { cls:'type-deposit', icon:'&#x1F4B0;' };
+  if (t.indexOf('withdraw') >= 0) return { cls:'type-withdrawal', icon:'&#x1F4B8;' };
+  if (t.indexOf('disburs') >= 0 || t.indexOf('loan issued') >= 0) return { cls:'type-loan', icon:'&#x1F3E6;' };
+  if (t.indexOf('repay') >= 0 || t.indexOf('installment') >= 0 || t.indexOf('payment') >= 0) return { cls:'type-repayment', icon:'&#x2705;' };
+  if (t.indexOf('interest') >= 0) return { cls:'type-interest', icon:'&#x1F4CA;' };
+  return { cls:'type-default', icon:'&#x1F4CB;' };
+}
+function fmtMoney(val) { var n = parseFloat(String(val).replace(/,/g,'')); if (isNaN(n)) return 'KES 0.00'; return 'KES ' + n.toLocaleString('en-KE', {minimumFractionDigits:2, maximumFractionDigits:2}); }
+function f(val) { if (val === undefined || val === null || String(val).trim() === '') return '-'; return String(val); }
+
+function callJSONP(url, params) {
+  return new Promise(function(resolve, reject) {
+    var cb = 'jcb_' + Math.random().toString(36).slice(2);
+    var tmo = setTimeout(function() { delete window[cb]; reject(new Error('Request timed out')); }, 15000);
+    window[cb] = function(data) { clearTimeout(tmo); delete window[cb]; var s = document.getElementById('_jsonpS'); if (s) s.remove(); resolve(data); };
+    var keys = Object.keys(params); keys.push('callback');
+    var qs = keys.map(function(k) { return encodeURIComponent(k) + '=' + encodeURIComponent(k === 'callback' ? cb : params[k]); }).join('&');
+    var s = document.createElement('script'); s.id = '_jsonpS'; s.src = url + '?' + qs;
+    s.onerror = function() { clearTimeout(tmo); delete window[cb]; reject(new Error('Failed to connect')); };
+    document.head.appendChild(s);
+  });
+}
+
+async function loadTransactions() {
+  var id = document.getElementById('searchId').value.trim();
+  var err = document.getElementById('searchErr'); var btn = document.getElementById('searchBtn');
+  if (!id) { err.textContent = 'Please enter a National ID number.'; err.style.display = 'block'; return; }
+  err.style.display = 'none'; btn.disabled = true; btn.textContent = 'Loading...';
+  document.getElementById('memberBar').style.display = 'none';
+  document.getElementById('txList').innerHTML = '<div class="state-box"><div class="icon">&#x23F3;</div><div>Loading transactions...</div></div>';
+  try {
+    var data = await callJSONP(BASE_URL, {page:'gettransactions', id:id});
+    allData = data; btn.disabled = false; btn.textContent = 'Search';
+    if (data.error) { document.getElementById('txList').innerHTML = '<div class="state-box"><div class="icon">&#x274C;</div><div>' + data.error + '</div></div>'; return; }
+    if (!data.transactions || data.transactions.length === 0) { document.getElementById('txList').innerHTML = '<div class="state-box"><div class="icon">&#x1F50D;</div><div>No transactions found for National ID <strong>' + id + '</strong>.</div></div>'; return; }
+    renderList(data);
+  } catch(ex) {
+    btn.disabled = false; btn.textContent = 'Search';
+    err.textContent = 'Error: ' + ex.message; err.style.display = 'block';
+    document.getElementById('txList').innerHTML = '<div class="state-box"><div class="icon">&#x274C;</div><div>Failed to load.</div></div>';
+  }
+}
+
+function renderList(data) {
+  document.getElementById('mName').textContent = data.memberName || 'Unknown Member';
+  document.getElementById('mMeta').textContent = 'National ID: ' + data.nationalId + '   |   Reg No: ' + (data.regNo || '-');
+  var total = data.transactions.length; var showing = Math.min(5, total);
+  document.getElementById('mCount').textContent = 'Showing ' + showing + ' most recent of ' + total + ' transaction(s)';
+  document.getElementById('memberBar').style.display = 'flex';
+  var html = '';
+  for (var i = 0; i < showing; i++) {
+    var tx = data.transactions[i]; var st = typeStyle(tx.type);
+    html += '<div class="tx-card"><div class="tx-header"><div class="tx-left"><div class="tx-icon ' + st.cls + '">' + st.icon + '</div><div><div class="tx-title">' + f(tx.type) + '</div><div class="tx-sub">' + f(tx.date) + ' &nbsp;|&nbsp; ' + f(tx.month) + ' ' + f(tx.year) + ' &nbsp;|&nbsp; Receipt: ' + f(tx.receiptNo) + '</div></div></div>';
+    html += '<div class="tx-right"><div class="tx-amount">' + fmtMoney(tx.amount) + '<small>' + f(tx.quarter) + '</small></div><button class="btn-rcp" id="btn-' + i + '" onclick="printReceipt(' + i + ')">&#x1F4C4; Print Receipt</button></div></div>';
+    if ((tx.remarks && tx.remarks !== '-') || (tx.dueDate && tx.dueDate !== '-')) {
+      html += '<div class="tx-remarks">';
+      if (tx.remarks && tx.remarks !== '-') html += '<strong>Remarks:</strong> ' + tx.remarks;
+      if (tx.dueDate && tx.dueDate !== '-') html += ' &nbsp;|&nbsp; <strong>Due Date:</strong> ' + tx.dueDate;
+      html += '</div>';
+    }
+    html += '</div>';
+  }
+  document.getElementById('txList').innerHTML = html;
+}
+
+function printReceipt(idx) {
+  if (!allData || !allData.transactions[idx]) return;
+  var tx = allData.transactions[idx];
+  var btn = document.getElementById('btn-' + idx); btn.disabled = true; btn.textContent = 'Loading...';
+  var st = typeStyle(tx.type);
+  var isLoan = (tx.type || '').toLowerCase().indexOf('loan') >= 0 || (tx.type || '').toLowerCase().indexOf('repay') >= 0 || (tx.type || '').toLowerCase().indexOf('disburs') >= 0;
+  var b = '<div class="rcp-wrap">';
+  b += '<div class="rcp-hdr"><img src="' + LOGO_SRC + '" alt="SANSTEEL SACCO"/><div><h1>SANSTEEL SACCO LIMITED</h1><p>Official Transaction Receipt</p></div></div>';
+  b += '<div class="rcp-typebar"><span class="rtype">' + st.icon + ' ' + f(tx.type) + '</span><span class="rno">Receipt No: ' + f(tx.receiptNo) + '</span></div>';
+  b += '<div class="rcp-body">';
+  b += '<div class="rcp-amtbox"><div class="albl">Transaction Amount</div><div class="aval">' + fmtMoney(tx.amount) + '</div></div>';
+  b += '<div class="rcp-sec">Transaction Details</div><div class="rcp-grid">';
+  b += '<div class="rcp-item"><label>Receipt No.</label><span>' + f(tx.receiptNo) + '</span></div>';
+  b += '<div class="rcp-item"><label>Date</label><span>' + f(tx.date) + '</span></div>';
+  b += '<div class="rcp-item"><label>Transaction Type</label><span>' + f(tx.type) + '</span></div>';
+  b += '<div class="rcp-item"><label>Quarter</label><span>' + f(tx.quarter) + '</span></div>';
+  b += '<div class="rcp-item"><label>Month</label><span>' + f(tx.month) + '</span></div>';
+  b += '<div class="rcp-item"><label>Year</label><span>' + f(tx.year) + '</span></div>';
+  if (tx.remarks && tx.remarks !== '-') b += '<div class="rcp-item full"><label>Remarks / Description</label><span>' + f(tx.remarks) + '</span></div>';
+  if (isLoan && tx.loanInterest && parseFloat(tx.loanInterest) !== 0) b += '<div class="rcp-item"><label>Loan Interest (KES)</label><span>' + fmtMoney(tx.loanInterest) + '</span></div>';
+  if (isLoan && tx.dueDate && tx.dueDate !== '-') b += '<div class="rcp-item"><label>Due Date</label><span>' + f(tx.dueDate) + '</span></div>';
+  b += '</div>';
+  b += '<div class="rcp-sec">Member Details</div><div class="rcp-grid">';
+  b += '<div class="rcp-item"><label>Member Name</label><span>' + f(tx.memberName) + '</span></div>';
+  b += '<div class="rcp-item"><label>Registration No.</label><span>' + f(tx.regNo) + '</span></div>';
+  b += '<div class="rcp-item"><label>National ID</label><span>' + f(tx.nationalId) + '</span></div>';
+  b += '</div>';
+  b += '<div class="rcp-sig">';
+  b += '<div class="rcp-sig-item"><label>Member Signature</label><div class="sig-line"></div><div class="sig-sub">Signature &amp; Date</div></div>';
+  b += '<div class="rcp-sig-item"><label>Authorized By (SACCO Official)</label><div class="sig-line"></div><div class="sig-sub">Signature &amp; Date</div></div>';
+  b += '</div>';
+  b += '</div>';
+  b += '<div class="rcp-foot">SANSTEEL SACCO LIMITED &nbsp;|&nbsp; Official Transaction Receipt &nbsp;|&nbsp; Printed: ' + new Date().toLocaleString('en-KE') + '</div>';
+  b += '</div>';
+  document.getElementById('modalPreview').innerHTML = b;
+  document.getElementById('modalTitle').textContent = f(tx.type) + '  |  ' + f(tx.receiptNo) + '  |  ' + f(tx.date);
+  document.getElementById('previewModal').classList.add('open');
+  currentReceiptHtml = b;
+  btn.disabled = false; btn.textContent = '&#x1F4C4; Print Receipt';
+}
+
+var currentReceiptHtml = '';
+function doPrint() {
+  if (!currentReceiptHtml) return;
+  var rcpCss = [
+    '@page { size: A4 landscape; margin: 8mm; }',
+    'html,body { margin:0; padding:0; background:#fff; font-family:Arial,sans-serif; }',
+    '.rcp-wrap { font-family:Arial,sans-serif; font-size:11px; color:#1a1a1a; background:#fff; }',
+    '.rcp-hdr { background:#0d1f3c; padding:10px 20px; display:flex; align-items:center; gap:12px; -webkit-print-color-adjust:exact; print-color-adjust:exact; }',
+    '.rcp-hdr img { width:50px; height:50px; border-radius:50%; border:2px solid #c9a84c; object-fit:cover; flex-shrink:0; }',
+    '.rcp-hdr h1 { margin:0 0 2px 0; font-size:14px; color:#c9a84c; }',
+    '.rcp-hdr p { margin:0; font-size:10px; color:rgba(255,255,255,.7); }',
+    '.rcp-typebar { padding:6px 20px; display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid #0d1f3c; }',
+    '.rcp-typebar .rtype { font-size:13px; font-weight:700; color:#0d1f3c; }',
+    '.rcp-typebar .rno { font-size:11px; color:#888; }',
+    '.rcp-body { padding:10px 20px; }',
+    '.rcp-sec { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.07em; color:#0d1f3c; border-bottom:1px solid #e0e0e0; padding-bottom:3px; margin:10px 0 6px 0; }',
+    '.rcp-grid { display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:0; }',
+    '.rcp-item { padding:4px 0; border-bottom:1px solid #f0f0f0; }',
+    '.rcp-item label { font-size:9px; text-transform:uppercase; color:#999; font-weight:700; display:block; margin-bottom:1px; }',
+    '.rcp-item span { font-size:11px; color:#1a1a1a; font-weight:500; }',
+    '.rcp-item.full { grid-column:1/-1; }',
+    '.rcp-amtbox { background:#f8f9fa; border:1px solid #e0e0e0; border-radius:4px; padding:8px 16px; margin:8px 0; display:flex; justify-content:space-between; align-items:center; -webkit-print-color-adjust:exact; print-color-adjust:exact; }',
+    '.rcp-amtbox .albl { font-size:11px; color:#666; }',
+    '.rcp-amtbox .aval { font-size:18px; font-weight:700; color:#0d1f3c; }',
+    '.rcp-sig { display:grid; grid-template-columns:1fr 1fr; gap:24px; margin-top:12px; padding-top:10px; border-top:1px solid #e0e0e0; }',
+    '.rcp-sig-item label { font-size:10px; color:#888; font-weight:700; text-transform:uppercase; display:block; margin-bottom:20px; }',
+    '.sig-line { border-bottom:1px solid #333; margin-bottom:4px; }',
+    '.sig-sub { font-size:9px; color:#aaa; }',
+    '.rcp-foot { background:#f8f9fa; border-top:1px solid #eee; text-align:center; padding:6px; font-size:9px; color:#aaa; margin-top:8px; -webkit-print-color-adjust:exact; print-color-adjust:exact; }'
+  ].join(' ');
+  var win = window.open('', '_blank', 'width=1100,height=700');
+  if (!win) { alert('Pop-up blocked. Please allow pop-ups for this page and try again.'); return; }
+  win.document.open();
+  win.document.write('<!DOCTYPE html><html><head><meta charset="utf-8"/><title>Receipt Preview</title><style>' + rcpCss + '</style></head><body>');
+  win.document.write(currentReceiptHtml);
+  win.document.write('<script>window.onload = function() { window.focus(); window.print(); };<\/script>');
+  win.document.write('</body></html>');
+  win.document.close();
+}
+
+function closeModal() { document.getElementById('previewModal').classList.remove('open'); document.getElementById('modalPreview').innerHTML = ''; currentReceiptHtml = ''; }
+document.addEventListener('click', function(e) { if (e.target.id === 'previewModal') closeModal(); });
+document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeModal(); });
+</script>
+
+<div class="modal-overlay" id="previewModal">
+  <div class="modal-box">
+    <div class="modal-topbar"><span id="modalTitle">Receipt Preview</span>
+      <div class="modal-actions"><button class="btn-print-now" onclick="doPrint()">&#x1F5A8; Print</button><button class="btn-close-modal" onclick="closeModal()">&#x2715; Close</button></div>
+    </div>
+    <div class="modal-preview" id="modalPreview"></div>
+  </div>
+</div>
+</body>
+</html>

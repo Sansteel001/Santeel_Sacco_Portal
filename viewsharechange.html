@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SANSTEEL SACCO – Share Change Record</title>
+  <meta name="theme-color" content="#0d1f3c"/>
+  <link rel="manifest" href="manifest.json"/>
+  <link rel="icon" href="icons/icon-192.png"/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root{--navy:#0d1f3c;--gold:#c9a84c;--gold2:#e8c96a;--cream:#faf8f3;--white:#fff;--text:#1a2236;--muted:#6b7a95;--border:#e4e8f0}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:"DM Sans",sans-serif;background:var(--cream);color:var(--text)}
+    .site-header{background:var(--navy);padding:0 28px;display:flex;align-items:center;justify-content:space-between;min-height:64px;box-shadow:0 2px 16px rgba(0,0,0,.3)}
+    .header-text h1{font-family:"Playfair Display",serif;font-size:16px;color:var(--gold)}
+    .header-text p{font-size:11px;color:rgba(255,255,255,.5);letter-spacing:.06em;text-transform:uppercase}
+    .print-btn{background:linear-gradient(135deg,var(--gold),var(--gold2));color:var(--navy);border:none;padding:9px 20px;border-radius:7px;font-size:13px;font-weight:700;cursor:pointer;font-family:"DM Sans",sans-serif}
+    .wrap{max-width:760px;margin:32px auto;padding:0 20px 60px}
+    .card{background:var(--white);border-radius:14px;padding:32px;margin-bottom:20px;border:1px solid var(--border);box-shadow:0 2px 12px rgba(13,31,60,.06)}
+    .doc-header{text-align:center;border-bottom:2px solid var(--gold);padding-bottom:20px;margin-bottom:24px}
+    .doc-header .society{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+    .doc-header h2{font-family:"Playfair Display",serif;font-size:22px;color:var(--navy);margin-bottom:4px}
+    .doc-header .act{font-size:12.5px;color:var(--muted)}
+    .ref-badge{display:inline-block;background:#eef1f8;padding:6px 18px;border-radius:7px;font-size:14px;font-weight:700;color:var(--navy);margin:10px 0}
+    .status-badge{display:inline-block;padding:4px 14px;border-radius:20px;font-size:12px;font-weight:700;margin-left:10px}
+    .status-submitted{background:#cce5ff;color:#004085;border:1px solid #007bff}
+    .status-pending{background:#fff3cd;color:#856404;border:1px solid #ffc107}
+    .status-approved{background:#d4edda;color:#155724;border:1px solid #28a745}
+    .status-rejected{background:#f8d7da;color:#721c24;border:1px solid #dc3545}
+    .status-default{background:#e2e3e5;color:#383d41;border:1px solid #ccc}
+    .info-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
+    .info-item .lbl{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px}
+    .info-item .val{font-size:14px;color:var(--text);font-weight:500}
+    .section-heading{font-family:"Playfair Display",serif;font-size:15px;color:var(--navy);margin:20px 0 12px;border-left:3px solid var(--gold);padding-left:10px}
+    .declaration-box{background:var(--cream);border-radius:8px;padding:16px 20px;margin:16px 0;border-left:3px solid var(--gold);font-size:14px;line-height:1.8;color:#3a4560}
+    .declaration-box strong{color:var(--navy)}
+    .sig-row{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:32px}
+    .sig-box{border-top:1.5px solid var(--navy);padding-top:8px}
+    .sig-box .lbl{font-size:11.5px;color:var(--muted)}
+    .notice{background:#fff8e6;border:1px solid #fcd34d;border-radius:8px;padding:12px 16px;font-size:12.5px;color:#92400e;margin-top:16px;line-height:1.6}
+    .loading{text-align:center;padding:60px;color:var(--muted)}
+    .error{text-align:center;padding:60px;color:#b91c1c}
+    @media print{.site-header,.print-btn{display:none !important}.card{box-shadow:none;border:1px solid #ddd}.wrap{margin:0;padding:0}}
+    @media(max-width:640px){.info-row{grid-template-columns:1fr}.sig-row{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+<div class="site-header">
+  <div class="header-text"><h1>SANSTEEL SACCO LIMITED</h1><p>Share Change Form &mdash; View Record</p></div>
+  <button class="print-btn" onclick="window.print()">&#128438; Print / Save PDF</button>
+</div>
+<div class="wrap" id="wrap"><div class="loading">Loading share change record&hellip;</div></div>
+<script src="config.js"></script>
+<script src="app.js"></script>
+<script>
+  var scId = getUrlParam("id");
+  function esc(s){ if(!s) return ""; return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+  function fmtMoney(val){ var n = parseFloat(String(val).replace(/,/g,'')); if(isNaN(n) || n === 0) return "KES 0.00"; return "KES " + n.toLocaleString('en-KE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+  function statusBadge(status){
+    var s = (status || 'Submitted').toLowerCase();
+    var cls = 'status-default'; var label = status || 'Submitted';
+    if(s.includes('pending')){ cls = 'status-pending'; label = 'Pending Review'; }
+    else if(s.includes('approv')){ cls = 'status-approved'; label = 'Approved'; }
+    else if(s.includes('reject')){ cls = 'status-rejected'; label = 'Rejected'; }
+    else if(s.includes('submit')){ cls = 'status-submitted'; label = 'Submitted'; }
+    return '<span class="status-badge ' + cls + '">' + esc(label) + '</span>';
+  }
+  function renderRecord(r){
+    if(!r || !r.data){ document.getElementById("wrap").innerHTML = '<div class="error">Share change record not found.</div>'; return; }
+    var d = r.data;
+    var html = '<div class="card">' +
+      '<div class="doc-header">' +
+        '<div class="society">Share Capital Change Request</div>' +
+        '<h2>SHARE CHANGE FORM</h2>' +
+        '<div class="act">SANSTEEL SAVINGS &amp; CREDIT CO-OPERATIVE SOCIETY LIMITED</div>' +
+        '<div style="margin-top:12px"><div class="ref-badge">' + esc(r.scId) + '</div>' + statusBadge(d.status || 'Submitted') + '</div>' +
+        '<div style="font-size:12px;color:var(--muted);margin-top:8px">Submitted: ' + esc(r.submissionDate) + '</div>' +
+      '</div>' +
+      '<div class="section-heading">Member Details</div>' +
+      '<div class="info-row"><div class="info-item"><div class="lbl">Full Name</div><div class="val">' + esc(d.fullName) + '</div></div><div class="info-item"><div class="lbl">National ID No.</div><div class="val">' + esc(d.idNumber) + '</div></div></div>' +
+      '<div class="info-row"><div class="info-item"><div class="lbl">Membership No.</div><div class="val">' + esc(d.membershipNo || "&mdash;") + '</div></div><div class="info-item"><div class="lbl">Telephone</div><div class="val">' + esc(d.tel || "&mdash;") + '</div></div></div>' +
+      '<div class="info-row"><div class="info-item"><div class="lbl">Home Address</div><div class="val">' + esc(d.homeAddress || "&mdash;") + '</div></div><div class="info-item"><div class="lbl">Present Address</div><div class="val">' + esc(d.presentAddress || "&mdash;") + '</div></div></div>' +
+      '<div class="info-row"><div class="info-item"><div class="lbl">Date of Birth</div><div class="val">' + esc(d.dateOfBirth || "&mdash;") + '</div></div><div class="info-item"><div class="lbl">Employer</div><div class="val">' + esc(d.employer || "&mdash;") + '</div></div></div>' +
+      '<div class="info-row"><div class="info-item"><div class="lbl">Designation</div><div class="val">' + esc(d.designation || "&mdash;") + '</div></div><div class="info-item"><div class="lbl">Loan Number</div><div class="val">' + esc(d.loanNumber || "&mdash;") + '</div></div></div>' +
+      '<div class="section-heading">Share Change Details</div>' +
+      '<div class="info-row"><div class="info-item"><div class="lbl">Current Monthly Deduction</div><div class="val">' + fmtMoney(d.fromAmount) + '</div></div><div class="info-item" style="background:var(--cream);border-radius:6px;padding:8px 12px;"><div class="lbl">New Monthly Deduction</div><div class="val" style="font-weight:700;color:var(--navy);font-size:16px;">' + fmtMoney(d.toAmount) + '</div></div></div>' +
+      '<div class="info-row"><div class="info-item"><div class="lbl">Repayment Period</div><div class="val">' + (d.repaymentPeriod ? esc(d.repaymentPeriod) + ' months' : "&mdash;") + '</div></div><div class="info-item"><div class="lbl">From Date</div><div class="val">' + esc(d.fromDate || "&mdash;") + '</div></div></div>' +
+      '<div class="info-row"><div class="info-item"><div class="lbl">To Date</div><div class="val">' + esc(d.toDate || "&mdash;") + '</div></div><div class="info-item"><div class="lbl">Loan Number</div><div class="val">' + esc(d.loanNumber || "&mdash;") + '</div></div></div>' +
+      '<div class="section-heading">Declaration</div>' +
+      '<div class="declaration-box">' +
+        'I hereby authorize Sansteel Savings &amp; Credit Co-operative Society to change my shares deduction from ' +
+        '<strong>' + fmtMoney(d.fromAmount) + '</strong> each month to <strong>' + fmtMoney(d.toAmount) + '</strong> each month. ' +
+        'Repayment period will be <strong>' + (d.repaymentPeriod ? esc(d.repaymentPeriod) + ' months' : "&mdash;") + '</strong> ' +
+        'from <strong>' + esc(d.fromDate || "&mdash;") + '</strong> to <strong>' + esc(d.toDate || "&mdash;") + '</strong>. ' +
+        (d.loanNumber ? 'Loan number: <strong>' + esc(d.loanNumber) + '</strong>' : '') +
+        '<br><br>I declare the foregoing particulars are true to the best of my knowledge.' +
+      '</div>' +
+      '<div class="section-heading">Witness</div>' +
+      '<div class="info-row"><div class="info-item"><div class="lbl">Witness Name</div><div class="val">' + esc(d.witnessName || "&mdash;") + '</div></div><div class="info-item"><div class="lbl">Witness Membership No.</div><div class="val">' + esc(d.witnessMembershipNo || "&mdash;") + '</div></div></div>' +
+      '<div class="info-row"><div class="info-item"><div class="lbl">Witness Date</div><div class="val">' + esc(d.witnessDate || "&mdash;") + '</div></div><div class="info-item"><div class="lbl">&nbsp;</div><div class="val">&nbsp;</div></div></div>' +
+      '<div class="sig-row">' +
+        '<div class="sig-box"><div class="lbl">Applicant Signature</div><div style="margin-top:6px;font-weight:600;font-size:15px;">' + esc(d.applicantSignature || "&mdash;") + '</div><div style="font-size:12px;color:var(--muted);margin-top:4px;">Date: ' + esc(d.applicantDate || "&mdash;") + '</div></div>' +
+        '<div class="sig-box"><div class="lbl">Witness Signature</div><div style="margin-top:6px;font-weight:600;font-size:15px;">' + esc(d.witnessName || "&mdash;") + '</div><div style="font-size:12px;color:var(--muted);margin-top:4px;">Date: ' + esc(d.witnessDate || "&mdash;") + '</div></div>' +
+      '</div>' +
+      '<div class="notice">&#9432; This is a digital record submitted on ' + esc(r.submissionDate) + '. A physical signed copy must also be submitted to the SACCO office to complete the process.</div>' +
+    '</div>';
+    document.getElementById("wrap").innerHTML = html;
+  }
+  if (!scId) {
+    document.getElementById("wrap").innerHTML='<div class="error">No share change ID provided.</div>';
+  } else {
+    jsonpCall("getsharechange", { id: scId })
+      .then(renderRecord)
+      .catch(function(e){ document.getElementById("wrap").innerHTML='<div class="error">Error: '+e.message+'</div>'; });
+  }
+</script>
+</body>
+</html>
