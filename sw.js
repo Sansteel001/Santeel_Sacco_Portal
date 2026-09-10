@@ -1,5 +1,5 @@
 // SANSTEEL SACCO PWA — service worker (offline app shell)
-var CACHE = "sansteel-pwa-v1";
+var CACHE = "sansteel-pwa-v2";
 var ASSETS = [
   "./", "./index.html", "./config.js", "./app.js", "./manifest.json",
   "./assets/logo.png", "./icons/icon-192.png", "./icons/icon-512.png", "./icons/icon-maskable-512.png",
