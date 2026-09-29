@@ -675,6 +675,11 @@ function resetAll() {
   if (activeDraftId) { jsonpCall("canceldraft", { id: activeDraftId, idNo: memberData ? memberData.idNo : "" }).catch(() => {}); }
   window.history.replaceState({}, "", "loan.html");
   activeDraftId = null;
+    isSending = false;
+["development","emergency","instant","item","backtowork"].forEach(t => {
+  setSubmitting(t, false);
+  setSendButtonLabel(t, "Send Guarantor Request");
+});
   document.getElementById("waitingScreen").classList.remove("show");
   document.getElementById("finalSubmitBtn").disabled = true;
   document.getElementById("finalSubmitBtn").style.display = "";
@@ -696,11 +701,6 @@ function resetAll() {
   document.getElementById("progressBar").style.display = "flex";
   setProgress(1);
   window.scrollTo({ top: 0, behavior: "smooth" });
-  isSending = false;
-["development","emergency","instant","item","backtowork"].forEach(t => {
-  setSubmitting(t, false);
-  setSendButtonLabel(t, "Send Guarantor Request");
-});
 }
 function setSendButtonLabel(loanType, text) {
   const map = { development:"dev", emergency:"em", instant:"ins", item:"it", backtowork:"bw" };
