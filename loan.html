@@ -395,6 +395,7 @@ let selectedLoan = null;
 let maxLoanAmount = 0;
 let activeDraftId = null;
 let pollTimer = null;
+let isSending = false;
 
 const LOAN_CAPS = { development: null, emergency: 40000, instant: 12000, item: null, backtowork: 8000 };
 const GUARANTOR_CONFIG = {
@@ -461,21 +462,40 @@ function renderChips(loanType, chipsEl, countEl) {
 }
 
 async function sendGuarantorRequests(loanType, payload) {
+  if (isSending || activeDraftId) return;          // hard block on repeat clicks
   const state = guarantorPickers[loanType] || { selected: [] };
   if (!state.selected.length) { alertUser("Please select at least one guarantor."); return; }
+
+  isSending = true;
   setSubmitting(loanType, true);
+  setSendButtonLabel(loanType, "Sending…");
   try {
     const data = JSON.stringify({ loanType: payload.loanType, member: payload.member, details: payload.details, guarantorIds: state.selected.map(g => g.idNo) });
     const res = await jsonpCall("createdraft", { data });
-    if (!res.success) { alertUser(res.error || "Could not send requests."); return; }
+    if (!res.success) {
+      alertUser(res.error || "Could not send requests.");
+      isSending = false;                            // allow retry only on failure
+      setSubmitting(loanType, false);
+      setSendButtonLabel(loanType, "Send Guarantor Request");
+      return;
+    }
     activeDraftId = res.draftId;
+    setSendButtonLabel(loanType, "✅ Request Sent");
+    showToast("✅ Guarantor request sent successfully!");
     window.history.pushState({ draftId: res.draftId }, "", "loan.html?draft=" + res.draftId);
-    document.querySelectorAll(".form-card").forEach(c => c.classList.remove("show"));
-    document.getElementById("loanTypeSection").style.display = "none";
-    document.getElementById("waitingScreen").classList.add("show");
-    startPolling();
-  } catch (e) { alertUser("Connection error: " + e.message); }
-  finally { setSubmitting(loanType, false); }
+    setTimeout(() => {
+      document.querySelectorAll(".form-card").forEach(c => c.classList.remove("show"));
+      document.getElementById("loanTypeSection").style.display = "none";
+      document.getElementById("waitingScreen").classList.add("show");
+      startPolling();
+    }, 1200);
+    // NOTE: button intentionally stays disabled on success
+  } catch (e) {
+    alertUser("Connection error: " + e.message);
+    isSending = false;
+    setSubmitting(loanType, false);
+    setSendButtonLabel(loanType, "Send Guarantor Request");
+  }
 }
 
 function startPolling() { if (pollTimer) clearInterval(pollTimer); pollStatus(); pollTimer = setInterval(pollStatus, 6000); }
@@ -614,6 +634,7 @@ function checkAmount(inputId, errorId) {
 }
 
 async function submitForm(loanType) {
+  if (isSending || activeDraftId) return;
   const pfx = { development:"dev_", emergency:"em_", instant:"ins_", item:"it_", backtowork:"bw_" }[loanType];
   const amount = parseFloat(document.getElementById(pfx + "amount")?.value || 0);
   if (!amount || amount <= 0) { return alertUser("Please enter a valid Loan Amount."); }
@@ -675,8 +696,25 @@ function resetAll() {
   document.getElementById("progressBar").style.display = "flex";
   setProgress(1);
   window.scrollTo({ top: 0, behavior: "smooth" });
+  isSending = false;
+["development","emergency","instant","item","backtowork"].forEach(t => {
+  setSubmitting(t, false);
+  setSendButtonLabel(t, "Send Guarantor Request");
+});
 }
-
+function setSendButtonLabel(loanType, text) {
+  const map = { development:"dev", emergency:"em", instant:"ins", item:"it", backtowork:"bw" };
+  const btn = document.getElementById(map[loanType] + "SubmitBtn");
+  if (btn) { const s = btn.querySelector("span"); if (s) s.textContent = text; }
+}
+function showToast(msg) {
+  const t = document.createElement("div");
+  t.textContent = msg;
+  t.style.cssText = "position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#1d6c45;color:#fff;padding:.8rem 1.4rem;border-radius:8px;font-size:.9rem;font-weight:600;box-shadow:0 8px 24px rgba(0,0,0,.25);z-index:99999;";
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 3500);
+}
+  
 setProgress(1);
 document.querySelectorAll('input[type=date]').forEach(el => { if (!el.value) el.value = new Date().toISOString().split("T")[0]; });
 
