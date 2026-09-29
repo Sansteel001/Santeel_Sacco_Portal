@@ -374,6 +374,12 @@
     <h2>Guarantor Requests Sent</h2>
     <p style="color:var(--mid);font-size:.9rem;">Your selected guarantors have been notified. The application will unlock for submission once everyone has accepted. You can close this page and check back later — just revisit this loan application link.</p>
     <div class="waiting-list" id="waitingList"></div>
+    <div id="reviseBox" style="display:none;text-align:left;max-width:520px;margin:1rem auto;">
+  <div class="g-picker" id="picker-revise"></div>
+  <button class="btn btn-primary" id="reviseBtn" onclick="submitReplacements()" style="margin-top:1rem;width:100%;justify-content:center;">
+    <span id="reviseBtnText">Send Request to New Guarantor(s)</span><div class="spinner" id="reviseSpinner"></div>
+  </button>
+</div>
     <div id="waitingActions"><button class="btn btn-primary" id="finalSubmitBtn" onclick="finalizeApplication()" disabled>Submit Application</button><button class="btn btn-secondary" onclick="resetAll()">← Start Over</button></div>
   </div>
 
@@ -426,7 +432,7 @@ function initGuarantorPicker(loanType) {
     if (!q) { results.classList.remove("show"); return; }
     debounceT = setTimeout(async () => {
       try {
-        const excludeId = memberData ? memberData.idNo : "";
+        const excludeId = memberData ? memberData.idNo : (window.reviseApplicantId || "");
         const list = await jsonpCall("searchmembers", { q, exclude: excludeId });
         renderResults(list);
       } catch (e) { /* silent */ }
@@ -434,7 +440,7 @@ function initGuarantorPicker(loanType) {
   });
   function renderResults(list) {
     const picked = guarantorPickers[loanType].selected.map(g => g.idNo);
-    const filtered = list.filter(m => !picked.includes(m.idNo));
+    const filtered = list.filter(m => !picked.includes(m.idNo) && !(window.reviseExcludeIds || []).includes(m.idNo));
     if (!filtered.length) { results.innerHTML = `<div class="g-empty-note">No matching active members found.</div>`; }
     else {
       results.innerHTML = filtered.map(m => `<div class="g-result-row" data-idno="${m.idNo}"><div class="gr-name">${m.name}</div><div class="gr-meta">ID ${m.idNo} · ${m.regNo || "—"} · ${m.phone || "—"}</div></div>`).join("");
@@ -459,14 +465,15 @@ function renderChips(loanType, chipsEl, countEl) {
   countEl.textContent = state.selected.length;
   chipsEl.innerHTML = state.selected.map(g => `<div class="g-chip"><div class="gc-info"><b>${g.name}</b><span>ID ${g.idNo} · ${g.regNo || "—"} · ${g.phone || "—"}</span></div><button type="button" onclick="removeGuarantor('${loanType}','${g.idNo}', this.closest('.g-picker').querySelector('.g-chips'), this.closest('.g-picker').querySelector('.gc-count'))">✕</button></div>`).join("");
 }
-
+let submitting = false;
 async function sendGuarantorRequests(loanType, payload) {
+  if (submitting) return;
   const state = guarantorPickers[loanType] || { selected: [] };
   if (!state.selected.length) { alertUser("Please select at least one guarantor."); return; }
   setSubmitting(loanType, true);
   try {
     const data = JSON.stringify({ loanType: payload.loanType, member: payload.member, details: payload.details, guarantorIds: state.selected.map(g => g.idNo) });
-    const res = await jsonpCall("createdraft", { data });
+    const res = await jsonpCall("createdraft", { data }, { maxRetries: 0 });
     if (!res.success) { alertUser(res.error || "Could not send requests."); return; }
     activeDraftId = res.draftId;
     window.history.pushState({ draftId: res.draftId }, "", "loan.html?draft=" + res.draftId);
@@ -489,14 +496,65 @@ async function pollStatus() {
     if (status.allAccepted) { document.getElementById("finalSubmitBtn").disabled = false; }
   } catch (e) { /* retry next tick */ }
 }
-function showDeclinedState() {
+let reviseKey = "";
+function showDeclinedState(status) {
   document.getElementById("finalSubmitBtn").style.display = "none";
-  if (document.getElementById("declinedMsg")) return;
-  const msg = document.createElement("div");
-  msg.id = "declinedMsg";
-  msg.style.cssText = "background:#fdecea;border:1px solid #fca5a5;color:#a81c1c;border-radius:8px;padding:.9rem 1.1rem;margin-bottom:1rem;font-size:.88rem;text-align:left;";
-  msg.textContent = "⚠️ One of your guarantors has declined this request. This application cannot proceed — please start over and choose different guarantors.";
-  document.getElementById("waitingActions").parentNode.insertBefore(msg, document.getElementById("waitingActions"));
+  const declined = status.guarantors.filter(g => g.status === "Declined");
+  const live     = status.guarantors.filter(g => g.status !== "Declined");
+  const max      = (GUARANTOR_CONFIG[status.draft.loanType] || {}).count || 1;
+  const slots    = Math.max(max - live.length, 0);
+
+  let msg = document.getElementById("declinedMsg");
+  if (!msg) {
+    msg = document.createElement("div");
+    msg.id = "declinedMsg";
+    msg.style.cssText = "background:#fdecea;border:1px solid #fca5a5;color:#a81c1c;border-radius:8px;padding:.9rem 1.1rem;margin-bottom:1rem;font-size:.88rem;text-align:left;";
+    document.getElementById("reviseBox").parentNode.insertBefore(msg, document.getElementById("reviseBox"));
+  }
+  msg.textContent = "⚠️ " + declined.map(g => g.name).join(", ") + " declined. Guarantors who already accepted are kept — just choose replacement(s) below.";
+
+  const key = declined.map(g => g.requestId).join("|");
+  if (key === reviseKey) return;           // don't wipe selections
+  reviseKey = key;
+
+  window.reviseApplicantId = status.draft.applicantIdNo;
+  window.reviseExcludeIds  = status.guarantors.map(g => g.idNo);
+  GUARANTOR_CONFIG.revise  = { count: slots };
+  const mount = document.getElementById("picker-revise");
+  mount.innerHTML = ""; delete mount.dataset.built;
+  initGuarantorPicker("revise");
+  document.getElementById("reviseBox").style.display = "block";
+}
+
+let revising = false;
+async function submitReplacements() {
+  if (revising) return;
+  const sel = (guarantorPickers.revise || { selected: [] }).selected;
+  if (!sel.length) return alertUser("Please select at least one replacement guarantor.");
+  revising = true;
+  const btn = document.getElementById("reviseBtn");
+  btn.disabled = true;
+  document.getElementById("reviseBtnText").textContent = "Sending request…";
+  document.getElementById("reviseSpinner").classList.add("show");
+  try {
+    const res = await jsonpCall("replaceguarantors",
+      { draftId: activeDraftId, idNo: window.reviseApplicantId, ids: sel.map(g => g.idNo).join(",") },
+      { maxRetries: 0 });
+    if (!res.success) { alertUser(res.error || "Could not send requests."); return; }
+    reviseKey = "";
+    document.getElementById("reviseBox").style.display = "none";
+    document.getElementById("declinedMsg")?.remove();
+    const fb = document.getElementById("finalSubmitBtn");
+    fb.style.display = ""; fb.disabled = true;
+    startPolling();
+  } catch (e) {
+    alertUser("Connection error: " + e.message);
+  } finally {
+    revising = false;
+    btn.disabled = false;
+    document.getElementById("reviseBtnText").textContent = "Send Request to New Guarantor(s)";
+    document.getElementById("reviseSpinner").classList.remove("show");
+  }
 }
 function renderWaiting(status) {
   const list = document.getElementById("waitingList");
@@ -642,15 +700,23 @@ function gatherAllFields(loanType, pfx) {
   return base;
 }
 function setSubmitting(loanType, state) {
-  const map = { development:"dev", emergency:"em", instant:"ins", item:"it", backtowork:"bw" };
-  const p = map[loanType];
-  const btn = document.getElementById(p + "SubmitBtn"); const sp = document.getElementById(p + "Spinner");
-  if (btn) btn.disabled = state; if (sp) sp.classList.toggle("show", state);
+  submitting = state;
+  const p = { development:"dev", emergency:"em", instant:"ins", item:"it", backtowork:"bw" }[loanType];
+  const btn = document.getElementById(p + "SubmitBtn");
+  const sp  = document.getElementById(p + "Spinner");
+  if (btn) {
+    btn.disabled = state;
+    const label = btn.querySelector("span");
+    if (label) label.textContent = state ? "Sending request…" : "Send Guarantor Request";
+  }
+  if (sp) sp.classList.toggle("show", state);
 }
 function alertUser(msg) { alert("⚠️ " + msg); }
 
 function resetAll() {
   if (pollTimer) clearInterval(pollTimer);
+  reviseKey = "";
+  document.getElementById("reviseBox").style.display = "none";
   if (activeDraftId) { jsonpCall("canceldraft", { id: activeDraftId, idNo: memberData ? memberData.idNo : "" }).catch(() => {}); }
   window.history.replaceState({}, "", "loan.html");
   activeDraftId = null;
