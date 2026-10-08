@@ -373,8 +373,25 @@
     <div class="waiting-icon">⏳</div>
     <h2>Guarantor Requests Sent</h2>
     <p style="color:var(--mid);font-size:.9rem;">Your selected guarantors have been notified. The application will unlock for submission once everyone has accepted. You can close this page and check back later — just revisit this loan application link.</p>
-    <div class="waiting-list" id="waitingList"></div>
-    <div id="waitingActions"><button class="btn btn-primary" id="finalSubmitBtn" onclick="finalizeApplication()" disabled>Submit Application</button><button class="btn btn-secondary" onclick="resetAll()">← Start Over</button></div>
+        <div class="waiting-list" id="waitingList"></div>
+
+    <div id="declinedNotice" style="display:none;background:#fdecea;border:1px solid #fca5a5;color:#a81c1c;border-radius:8px;padding:.9rem 1.1rem;margin-bottom:1rem;font-size:.88rem;text-align:left;">
+      ⚠️ A guarantor declined. Click <b>Replace</b> next to their name and choose another member. Your application details stay the same.
+    </div>
+
+    <div id="replaceBox" style="display:none;max-width:420px;margin:0 auto 1rem;text-align:left;">
+      <label style="font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--navy);display:block;margin-bottom:.5rem;">Choose replacement guarantor</label>
+      <div class="g-picker">
+        <div class="search-wrap">
+          <input type="text" class="g-search" id="replaceSearch" placeholder="Search by name, ID, or membership no…" autocomplete="off"/>
+          <div class="g-results" id="replaceResults"></div>
+        </div>
+      </div>
+      <button class="btn btn-secondary" style="margin-top:.6rem" onclick="cancelReplace()">Cancel</button>
+    </div>
+
+    <p style="font-size:.8rem;color:var(--mid);margin-bottom:1rem;">Your application will be submitted automatically once every guarantor has accepted.</p>
+    <div id="waitingActions"><button class="btn btn-secondary" onclick="resetAll()">Cancel Application</button></div>
   </div>
 
   <div class="success-screen" id="successScreen">
@@ -499,44 +516,108 @@ async function sendGuarantorRequests(loanType, payload) {
 }
 
 function startPolling() { if (pollTimer) clearInterval(pollTimer); pollStatus(); pollTimer = setInterval(pollStatus, 6000); }
+let lastStatus = null;
+let replacingRequestId = null;
+
 async function pollStatus() {
   if (!activeDraftId) return;
   try {
     const status = await jsonpCall("draftstatus", { id: activeDraftId });
     if (!status) return;
+    lastStatus = status;
+    if (status.draft.status === "Submitted") {
+      if (pollTimer) clearInterval(pollTimer);
+      showSuccess(status.draft.finalAppId);
+      return;
+    }
+    if (status.draft.status === "Cancelled") {
+      if (pollTimer) clearInterval(pollTimer);
+      alertUser("This application was cancelled.");
+      resetAll();
+      return;
+    }
     renderWaiting(status);
-    if (status.anyDeclined) { if (pollTimer) clearInterval(pollTimer); showDeclinedState(); return; }
-    if (status.allAccepted) { document.getElementById("finalSubmitBtn").disabled = false; }
   } catch (e) { /* retry next tick */ }
 }
-function showDeclinedState() {
-  document.getElementById("finalSubmitBtn").style.display = "none";
-  if (document.getElementById("declinedMsg")) return;
-  const msg = document.createElement("div");
-  msg.id = "declinedMsg";
-  msg.style.cssText = "background:#fdecea;border:1px solid #fca5a5;color:#a81c1c;border-radius:8px;padding:.9rem 1.1rem;margin-bottom:1rem;font-size:.88rem;text-align:left;";
-  msg.textContent = "⚠️ One of your guarantors has declined this request. This application cannot proceed — please start over and choose different guarantors.";
-  document.getElementById("waitingActions").parentNode.insertBefore(msg, document.getElementById("waitingActions"));
-}
-function renderWaiting(status) {
-  const list = document.getElementById("waitingList");
-  list.innerHTML = status.guarantors.map(g => { const cls = g.status === "Accepted" ? "wb-accepted" : g.status === "Declined" ? "wb-declined" : "wb-pending"; return `<div class="waiting-row"><b>${g.name}</b><span class="waiting-badge ${cls}">${g.status}${g.initials ? " · " + g.initials : ""}</span></div>`; }).join("");
-}
-async function finalizeApplication() {
-  if (!activeDraftId) return;
-  const btn = document.getElementById("finalSubmitBtn");
-  btn.disabled = true; btn.textContent = "Submitting…";
-  try {
-    const res = await jsonpCall("finalizeloan", { draftId: activeDraftId });
-    if (!res.success) { alertUser(res.error || "Could not submit yet."); btn.disabled = false; btn.textContent = "Submit Application"; return; }
-    if (pollTimer) clearInterval(pollTimer);
-    document.getElementById("waitingScreen").classList.remove("show");
-    document.getElementById("progressBar").style.display = "none";
-    document.getElementById("successScreen").classList.add("show");
-    document.getElementById("successAppId").textContent = res.appId;
-  } catch (e) { alertUser("Connection error: " + e.message); btn.disabled = false; btn.textContent = "Submit Application"; }
+
+function showSuccess(appId) {
+  activeDraftId = null;
+  window.history.replaceState({}, "", "loan.html");
+  document.getElementById("waitingScreen").classList.remove("show");
+  document.getElementById("progressBar").style.display = "none";
+  document.getElementById("successScreen").classList.add("show");
+  document.getElementById("successAppId").textContent = appId || "";
+  showToast("✅ All guarantors accepted — application submitted!");
 }
 
+function renderWaiting(status) {
+  const list = document.getElementById("waitingList");
+  list.innerHTML = status.guarantors.map(g => {
+    const cls = g.status === "Accepted" ? "wb-accepted" : g.status === "Declined" ? "wb-declined" : "wb-pending";
+    const btn = g.status === "Declined"
+      ? `<button class="btn btn-gold" style="padding:.3rem .8rem;font-size:.72rem;margin-left:.5rem" onclick="startReplace('${g.requestId}')">Replace</button>` : "";
+    return `<div class="waiting-row"><b>${g.name}</b><span><span class="waiting-badge ${cls}">${g.status}${g.initials ? " · " + g.initials : ""}</span>${btn}</span></div>`;
+  }).join("");
+  const anyDeclined = status.guarantors.some(g => g.status === "Declined");
+  document.getElementById("declinedNotice").style.display = anyDeclined ? "block" : "none";
+  if (!anyDeclined) cancelReplace();
+}
+
+function startReplace(reqId) {
+  replacingRequestId = reqId;
+  document.getElementById("replaceBox").style.display = "block";
+  document.getElementById("replaceSearch").focus();
+}
+function cancelReplace() {
+  replacingRequestId = null;
+  document.getElementById("replaceBox").style.display = "none";
+  document.getElementById("replaceSearch").value = "";
+  document.getElementById("replaceResults").classList.remove("show");
+}
+
+(function initReplaceSearch() {
+  const input = document.getElementById("replaceSearch");
+  const results = document.getElementById("replaceResults");
+  let t;
+  input.addEventListener("input", () => {
+    clearTimeout(t);
+    const q = input.value.trim();
+    if (!q) { results.classList.remove("show"); return; }
+    t = setTimeout(async () => {
+      try {
+        const applicantId = lastStatus ? lastStatus.draft.applicantIdNo : "";
+        const list = await jsonpCall("searchmembers", { q, exclude: applicantId });
+        const taken = lastStatus ? lastStatus.guarantors.map(g => String(g.idNo)) : [];
+        const filtered = list.filter(m => !taken.includes(String(m.idNo)));
+        results.innerHTML = filtered.length
+          ? filtered.map(m => `<div class="g-result-row" data-idno="${m.idNo}"><div class="gr-name">${m.name}</div><div class="gr-meta">ID ${m.idNo} · ${m.regNo || "—"} · ${m.phone || "—"}</div></div>`).join("")
+          : `<div class="g-empty-note">No matching active members found.</div>`;
+        results.classList.add("show");
+        results.querySelectorAll(".g-result-row").forEach(row => {
+          row.addEventListener("click", () => {
+            const m = filtered.find(x => String(x.idNo) === row.dataset.idno);
+            confirmReplace(m);
+          });
+        });
+      } catch (e) { /* silent */ }
+    }, 300);
+  });
+})();
+
+async function confirmReplace(member) {
+  if (!member || !replacingRequestId || !activeDraftId) return;
+  if (!confirm("Send a guarantor request to " + member.name + " instead?")) return;
+  try {
+    const res = await jsonpCall("replaceguarantor", {
+      draftId: activeDraftId, requestId: replacingRequestId,
+      newId: member.idNo, applicantId: lastStatus.draft.applicantIdNo
+    });
+    if (!res.success) { alertUser(res.error || "Could not replace guarantor."); return; }
+    showToast("✅ Request sent to " + res.newGuarantor.name);
+    cancelReplace();
+    pollStatus();
+  } catch (e) { alertUser("Connection error: " + e.message); }
+}
 ["development","emergency","instant","item","backtowork"].forEach(initGuarantorPicker);
 
 function setProgress(step) {
@@ -680,11 +761,8 @@ function resetAll() {
   setSubmitting(t, false);
   setSendButtonLabel(t, "Send Guarantor Request");
 });
-  document.getElementById("waitingScreen").classList.remove("show");
-  document.getElementById("finalSubmitBtn").disabled = true;
-  document.getElementById("finalSubmitBtn").style.display = "";
-  document.getElementById("finalSubmitBtn").textContent = "Submit Application";
-  document.getElementById("declinedMsg")?.remove();
+    document.getElementById("waitingScreen").classList.remove("show");
+  lastStatus = null; cancelReplace();
   Object.keys(guarantorPickers).forEach(t => guarantorPickers[t].selected = []);
   document.querySelectorAll(".g-picker .g-chips").forEach(el => el.innerHTML = "");
   document.querySelectorAll(".g-picker .gc-count").forEach(el => el.textContent = "0");
